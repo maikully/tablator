@@ -3,7 +3,7 @@ import os
 from io import BytesIO
 from mido import MidiFile
 from tab_creator import extract_notes, generate_fingerings, compute_cost, compute_path, tab_to_string, generate_tab_arr
-from flask import Flask, current_app, jsonify, request, flash, redirect, url_for
+from flask import Flask, current_app, jsonify, request, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 
@@ -80,6 +80,9 @@ def process_file():
     os.remove(UPLOAD_FOLDER + "/" + filename)
     return jsonify(data=strs)
 
-if __name__ == "__main__":
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=8080)
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
