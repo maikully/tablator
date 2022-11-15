@@ -4,6 +4,7 @@ import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
+import MidiPlayer from 'react-midi-player';
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
@@ -15,8 +16,8 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
-  const url = 'http://127.0.0.1/tablator'
-  //const url = 'http://tablator.herokuapp.com/tablator'
+  //const url = 'http://127.0.0.1/tablator'
+  const url = 'http://tablator.herokuapp.com/tablator'
   // the react post request sender
   const uploadFile = async e => {
     const file = e.target.files[0]
