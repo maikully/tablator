@@ -14,7 +14,7 @@ TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
 UPLOAD_FOLDER = 'midi_files'
 
 app = Flask(__name__ 
-    ,static_folder='../frontend/build',static_url_path='')
+    ,static_folder='frontend/build',static_url_path='')
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 cors = CORS(app)
