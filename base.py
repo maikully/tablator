@@ -14,7 +14,7 @@ TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
 UPLOAD_FOLDER = 'midi_files'
 
 app = Flask(__name__ 
-    ,static_folder='frontend/build',static_url_path='')
+    ,static_folder='./frontend/build',static_url_path='/')
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 cors = CORS(app)
@@ -79,10 +79,10 @@ def process_file():
     #print(strs)
     os.remove(UPLOAD_FOLDER + "/" + filename)
     return jsonify(data=strs)
-
+    
 @app.route('/')
-def serve():
-    return send_from_directory(app.static_folder, 'index.html')
+def index():
+    return app.send_static_file('index.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
