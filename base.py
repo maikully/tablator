@@ -20,6 +20,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 cors = CORS(app)
 ALLOWED_EXTENSIONS = {'mid','midi'}
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -78,3 +79,7 @@ def process_file():
     #print(strs)
     os.remove(UPLOAD_FOLDER + "/" + filename)
     return jsonify(data=strs)
+
+if __name__ == "__main__":
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
