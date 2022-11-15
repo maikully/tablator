@@ -13,7 +13,8 @@ STARTS = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string
 TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
 UPLOAD_FOLDER = 'midi_files'
 
-app = Flask(__name__)
+app = Flask(__name__ 
+    ,static_folder='../frontend/build',static_url_path='')
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 cors = CORS(app)
@@ -25,7 +26,6 @@ def allowed_file(filename):
 
 @app.route('/time')
 def get_current_time():
-
     return {'time': time.time()}
 
 
