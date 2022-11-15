@@ -12,14 +12,23 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+
+h1 {
+
+  font-size: xxx-large;
+}
+
 .tab {
-  font-family:monospace;
+  font-family: monospace;
   white-space: pre-line;
   text-align: left;
   margin-left: 10vw;
   margin-right: 10vw;
-  overflow:hidden
+  overflow: hidden;
+  font-size: large;
+  line-height: 18px;
 }
+
 .App-header {
   background-color: #282c34;
   min-height: 33vh;
@@ -39,6 +48,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

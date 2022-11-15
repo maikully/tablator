@@ -1,7 +1,9 @@
 import logo from './logo.svg'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
+import { Button, Form } from 'react-bootstrap'
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
@@ -13,8 +15,8 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
-  //const url = "http://127.0.0.1:5000/tablator"
-  const url = 'http://tablator.herokuapp.com/tablator'
+  const url = 'http://127.0.0.1/tablator'
+  //const url = 'http://tablator.herokuapp.com/tablator'
   // the react post request sender
   const uploadFile = async e => {
     const file = e.target.files[0]
@@ -33,15 +35,21 @@ export default function App () {
       setTab3(res.data[2])
     }
   }
-  const handleChange = (i) => {
+  const handleChange = i => {
     switch (i) {
       case 1:
         setView1(true)
+        setView2(false)
+        setView3(false)
         break
       case 2:
+        setView1(false)
         setView2(true)
+        setView3(false)
         break
       case 3:
+        setView1(false)
+        setView2(false)
         setView3(true)
         break
       default:
@@ -56,18 +64,30 @@ export default function App () {
   return (
     <div className='App'>
       <header className='App-header'>
+        <br></br>
         <h1>tablator</h1>
-        <form>
-          <input type='file' onChange={uploadFile}></input>
-        </form>
-        {tab1.length > 0 && 
-        <div>
-        <button onClick={() => handleChange(1)}>View tab 1</button>
-        <button onClick={() => handleChange(2)}>View tab 2</button>
-        <button onClick={() => handleChange(3)}>View tab 3</button></div>
-        }
+        <br></br>
+      <Form.Group  onChange={uploadFile} controlId="formFile" className="mb-3">
+        <Form.Label>
+        <p style={{fontSize:"medium"}}>choose a .mid or .midi file</p></Form.Label>
+        <Form.Control type="file" />
+      </Form.Group>
+        {tab1.length > 0 && (
+          <div style={{marginBottom: "5vh"}}>
+            <Button onClick={() => handleChange(1)} variant='primary'>
+              View tab 1
+            </Button>{' '}
+            <Button onClick={() => handleChange(2)} variant='primary'>
+              View tab 2
+            </Button>{' '}
+            <Button onClick={() => handleChange(3)} variant='primary'>
+              View tab 3
+            </Button>{' '}
+          </div>
+        )}
       </header>
       <div>
+        <br></br>
         {view1 && (
           <div>
             <h2>Tab 1</h2>

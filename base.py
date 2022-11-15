@@ -11,6 +11,7 @@ RANGES = [12, 12, 12, 14, 18, 18]  # fret range of each string
 # STARTS = [53,58,63,68,72,77] # starts on first fret of each string
 STARTS = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string
 TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
+STRINGS = ["E", "B", "G", "D", "A", "E"]
 UPLOAD_FOLDER = 'midi_files'
 
 app = Flask(__name__ 
@@ -69,14 +70,16 @@ def process_file():
                 tab_arr = generate_tab_arr(file, path)
                 strs.append([])
                 length = len(tab_arr[0])
-                line_length = 175
+                line_length = 145
                 lines = length // line_length + 1
                 for n in range(lines):
-                    for y in tab_arr:
-                        strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
+                    for i,y in enumerate(tab_arr):
+                        if n == 0:
+                            strs[-1].append(STRINGS[i] + "|" + "".join(y)[n * line_length: (n + 1) * line_length] )
+                        else:
+                            strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
                     strs[-1].append("\n")
             counter += 1
-    #print(strs)
     os.remove(UPLOAD_FOLDER + "/" + filename)
     return jsonify(data=strs)
 
