@@ -17,7 +17,7 @@ export default function App () {
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
   //const url = 'http://127.0.0.1/tablator'
-  const url = 'http://tablator.herokuapp.com/tablator'
+  const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const uploadFile = async e => {
     const file = e.target.files[0]
