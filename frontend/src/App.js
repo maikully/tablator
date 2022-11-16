@@ -1,10 +1,10 @@
-import logo from './logo.svg'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
 import MidiPlayer from 'react-midi-player'
+import $ from "jquery";
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
@@ -31,11 +31,13 @@ export default function App () {
 
     if (file != null) {
       const data = new FormData()
+      const width = $(window).width()
       data.append('file', file)
-
+      data.append('width', width)
+      console.log(width)
       let response = await fetch(url, {
         method: 'post',
-        body: data
+        body: data,
       })
       let res = await response.json()
       console.log(res)
@@ -124,24 +126,29 @@ export default function App () {
       <div>
         <br></br>
         {view1 && (
-          <div>
-            <h2>Tab 1</h2>
+          <>
+          <h2>Tab 1</h2>
+          <div id="container">
             <p className='tab'>{tab1.map(x => x + '\n')}</p>
           </div>
+          </>
         )}
         {view2 && (
-          <div>
-            <h2>Tab 2</h2>
+          <>
+          <h2>Tab 2</h2>
+          <div id="container">
             <p className='tab'>{tab2.map(x => x + '\n')}</p>
           </div>
+          </>
         )}
 
         {view3 && (
-          <div>
-            <h2>Tab 3</h2>
+          <>
+          <h2>Tab 3</h2>
+          <div id="container">
             <p className='tab'>{tab3.map(x => x + '\n')}</p>
-            <br />
           </div>
+          </>
         )}
       </div>
     </div>

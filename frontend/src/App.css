@@ -17,13 +17,20 @@ h1 {
 
   font-size: xxx-large;
 }
+#container {
+  display: flex;
+  justify-content: center; /* Can be changed in the live sample */
+}
 
+#container > div {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(-45deg, #788cff, #b4c8ff);
+}
 .tab {
   font-family: monospace;
   white-space: pre-line;
   text-align: left;
-  margin-left: 10vw;
-  margin-right: 10vw;
   overflow: hidden;
   font-size: large;
   line-height: 18px;

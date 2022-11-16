@@ -29,6 +29,7 @@ def allowed_file(filename):
 @app.route('/tablator', methods=["POST"], strict_slashes=False)
 @cross_origin()
 def process_file():
+    screen_width = int(request.form["width"])
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -60,13 +61,13 @@ def process_file():
             if to_check in seen:
                 continue
             else:
-                print(tuple([x[0] for x in path]))
                 seen.add(to_check)
                 # get tab arr from path
                 tab_arr = generate_tab_arr(file, path)
                 strs.append([])
                 length = len(tab_arr[0])
-                line_length = 100
+                line_length = screen_width // 12
+                print(line_length)
                 lines = length // line_length + 1
                 remainder = length & line_length - 1
                 if length < line_length:
@@ -80,7 +81,6 @@ def process_file():
                             else:
                                 strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
                         strs[-1].append("\n")
-                    print(remainder)
                     for i,z in enumerate(tab_arr):
                         strs[-1].append("".join(y)[(n+1) * line_length: (n+1) * line_length + remainder] )
                 
