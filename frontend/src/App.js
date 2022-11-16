@@ -126,6 +126,7 @@ export default function App () {
         })
         let res = await response.json()
         setLoading(false)
+        console.log(res.data)
         if (res.data[0]) {
           setTab1(res.data[0])
           setCost1(truncateDecimals(res.costs[0], 2))

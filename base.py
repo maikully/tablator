@@ -67,7 +67,6 @@ def process_file():
     #return jsonify(d)
     file = MidiFile(UPLOAD_FOLDER + "/" + "temp.mid", clip=True)
     notes = extract_notes(file, starts, total_range)
-    print(notes)
     sequence = generate_fingerings(notes, starts, ranges)
     final_paths = get_paths(sequence)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
@@ -85,7 +84,6 @@ def process_file():
                 seen.add(to_check)
                 costs.append(cost)
                 # get tab arr from path
-                print(path)
                 tab_arr = generate_tab_arr(file, path, num_strings)
                 strs.append([])
                 length = len(tab_arr[0])
@@ -98,7 +96,7 @@ def process_file():
                 else:
                     # flag represents which string should have its first digit removed
                     flag = None
-                    for n in range(lines):
+                    for n in range(lines - 1):
                         for i,string in enumerate(tab_arr):
                             # if a two-digit fret is being cut off
                             if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
@@ -114,8 +112,13 @@ def process_file():
                                 else:
                                     strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
                         strs[-1].append("\n")
-                    for i,z in enumerate(tab_arr):
-                        strs[-1].append(strings[i] + "|" + "".join(z)[(n+1) * line_length:]  +"|")
+                    print((n + 1) * line_length)
+                    print(length)
+                    print(line_length)
+                    print(remainder)
+                    if remainder > 0:
+                        for i,z in enumerate(tab_arr):
+                            strs[-1].append(strings[i] + "|" + "".join(z)[(n + 1) * line_length:(n + 1) * line_length + remainder + 2]  +"|")
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
