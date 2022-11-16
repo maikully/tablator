@@ -73,7 +73,7 @@ def get_all_tab_monophonic(file):
     notes = []
     for i, x in enumerate(file):
         if isinstance(x, MetaMessage):
-            print(x)
+            #print(x)
             pass
         else:
             # if i < 100:
@@ -171,25 +171,24 @@ def generate_tab_arr(file, best_path):
             for y in output:
                 y += "-"
             if x.time > .5:
-                for x in output:
-                    x += "-"
-            else:
-                if x.type == "note_on":
-                    if prev and prev.type == "note_on" and x.time == 0:
-                        pass
-                    else:
-                        ideal_note = best_path[note_counter]
-                        (string, fret, finger) = ideal_note
-                        # add to output
-                        for i, arr in enumerate(output):
-                            if string == i:
-                                output[i].append(str(fret))
-                            else:
+                for y in output:
+                    y += "-"
+            if x.type == "note_on":
+                if prev and prev.type == "note_on" and x.time == 0:
+                    pass
+                else:
+                    ideal_note = best_path[note_counter]
+                    (string, fret, finger) = ideal_note
+                    # add to output
+                    for i, arr in enumerate(output):
+                        if string == i:
+                            output[i].append(str(fret))
+                        else:
+                            output[i].append("-")
+                            if fret > 9:
                                 output[i].append("-")
-                                if fret > 9:
-                                    output[i].append("-")
-                        note_counter += 1
-                prev = x
+                    note_counter += 1
+            prev = x
     return (output)
 
 
@@ -224,6 +223,7 @@ def main():
     seen = set()
     for i, (cost, path) in enumerate(sorted_paths):
         if counter < 3:
+            print([x[0] for x in path])
             to_check = tuple([x[0] for x in path])
             if to_check in seen:
                 continue

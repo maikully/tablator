@@ -60,20 +60,30 @@ def process_file():
             if to_check in seen:
                 continue
             else:
+                print(tuple([x[0] for x in path]))
                 seen.add(to_check)
                 # get tab arr from path
                 tab_arr = generate_tab_arr(file, path)
                 strs.append([])
                 length = len(tab_arr[0])
-                line_length = 145
+                line_length = 100
                 lines = length // line_length + 1
-                for n in range(lines):
+                remainder = length & line_length - 1
+                if length < line_length:
                     for i,y in enumerate(tab_arr):
-                        if n == 0:
-                            strs[-1].append(STRINGS[i] + "|" + "".join(y)[n * line_length: (n + 1) * line_length] )
-                        else:
-                            strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
-                    strs[-1].append("\n")
+                        strs[-1].append(STRINGS[i] + "|" + "".join(y))
+                else:
+                    for n in range(lines):
+                        for i,y in enumerate(tab_arr):
+                            if n == 0:
+                                strs[-1].append(STRINGS[i] + "|" + "".join(y)[n * line_length: (n + 1) * line_length] )
+                            else:
+                                strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
+                        strs[-1].append("\n")
+                    print(remainder)
+                    for i,z in enumerate(tab_arr):
+                        strs[-1].append("".join(y)[(n+1) * line_length: (n+1) * line_length + remainder] )
+                
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
     return jsonify(data=strs)

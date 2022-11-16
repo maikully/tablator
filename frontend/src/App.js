@@ -17,8 +17,8 @@ export default function App () {
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
   const [midiFile, setFile] = useState(null)
-  //const url = 'http://127.0.0.1/tablator'
-  const url = 'https://tablator.herokuapp.com/tablator'
+  const url = 'http://127.0.0.1/tablator'
+  //const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const uploadFile = async e => {
@@ -38,9 +38,16 @@ export default function App () {
         body: data
       })
       let res = await response.json()
-      setTab1(res.data[0])
-      setTab2(res.data[1])
-      setTab3(res.data[2])
+      console.log(res)
+      if (res.data[0]) {
+        setTab1(res.data[0])
+      }
+      if (res.data[1]) {
+        setTab2(res.data[1])
+      }
+      if (res.data[2]) {
+        setTab3(res.data[2])
+      }
     }
   }
   const handleChange = i => {
@@ -77,27 +84,39 @@ export default function App () {
         <br></br>
         <Form.Group onChange={uploadFile} controlId='formFile' className='mb-3'>
           <Form.Label>
-            <p style={{ fontSize: 'medium' }}>choose a .mid or .midi file to generate its best possible tabs!</p>
+            <p style={{ fontSize: 'medium' }}>
+              choose a .mid or .midi file to generate its best possible tabs!
+            </p>
           </Form.Label>
           <Form.Control type='file' />
         </Form.Group>
-        {tab1.length > 0 && (
-          <div style={{ marginBottom: '2vh' }}>
-            <Button onClick={() => handleChange(1)} variant='primary'>
-              View tab 1
-            </Button>{' '}
-            <Button onClick={() => handleChange(2)} variant='primary'>
-              View tab 2
-            </Button>{' '}
-            <Button onClick={() => handleChange(3)} variant='primary'>
-              View tab 3
-            </Button>{' '}
-            <br></br>
-          </div>
-        )}
+        <div style={{ marginBottom: '2vh' }}>
+          {tab1.length > 0 && (
+            <>
+              <Button onClick={() => handleChange(1)} variant='primary'>
+                View tab 1
+              </Button>{' '}
+            </>
+          )}
+          {tab2.length > 0 && (
+            <>
+              <Button onClick={() => handleChange(2)} variant='primary'>
+                View tab 2
+              </Button>{' '}
+            </>
+          )}
+          {tab3.length > 0 && (
+            <>
+              <Button onClick={() => handleChange(3)} variant='primary'>
+                View tab 3
+              </Button>{' '}
+            </>
+          )}
+          <br></br>
+        </div>
         {midiFile && (
           <MidiPlayer
-            style={{ marginTop: '20px', marginBototm:"10vh" }}
+            style={{ marginTop: '20px', marginBototm: '10vh' }}
             data={midiFile}
           ></MidiPlayer>
         )}
