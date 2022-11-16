@@ -118,7 +118,7 @@ export default function App () {
         </div>
         {midiFile && (
           <MidiPlayer
-            style={{ marginTop: '20px', marginBototm: '10vh' }}
+            style={{ marginTop: '20px', marginBottom: '5vh' }}
             data={midiFile}
           ></MidiPlayer>
         )}
