@@ -125,7 +125,7 @@ export default function App () {
           <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          For every note within the range of the guitar, a guitarist must choose
+          For any note within the range of the guitar, a guitarist must choose
           which finger to use to fret the string and/or which string to play the
           note on. This choice greatly impacts the playability of the passage:
           an easier fingering means an easier time playing. This program uses a
