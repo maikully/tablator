@@ -128,7 +128,7 @@ def extract_notes(file):
             pass
         else:
             if x.type == "note_on":
-                if prev.type == "note_on" and x.time == 0:
+                if prev and prev.type == "note_on" and x.time == 0:
                     notes[-1].append(correct_note(x.note))
                 else:
                     notes.append([correct_note(x.note)])
