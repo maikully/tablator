@@ -70,7 +70,7 @@ def process_file():
                 length = len(tab_arr[0])
                 line_length = screen_width // 12
                 lines = length // line_length + 1
-                remainder = length & line_length - 1
+                remainder = length % line_length - 1
                 if length < line_length:
                     for i,y in enumerate(tab_arr):
                         strs[-1].append(STRINGS[i] + "|" + "".join(y))
@@ -78,12 +78,12 @@ def process_file():
                     for n in range(lines):
                         for i,y in enumerate(tab_arr):
                             if n == 0:
-                                strs[-1].append(STRINGS[i] + "|" + "".join(y[n * line_length: (n + 1) * line_length]) )
+                                strs[-1].append(STRINGS[i] + "|" + "".join(y)[n * line_length: (n + 1) * line_length] )
                             else:
-                                strs[-1].append("".join(y[n * line_length: (n + 1) * line_length] ))
+                                strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
                         strs[-1].append("\n")
                     for i,z in enumerate(tab_arr):
-                        strs[-1].append("".join(z[(n+1) * line_length: (n+1) * line_length + remainder] ))
+                        strs[-1].append("".join(z)[(n+1) * line_length:] )
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
