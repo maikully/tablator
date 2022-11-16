@@ -77,7 +77,7 @@ export default function App () {
         <br></br>
         <Form.Group onChange={uploadFile} controlId='formFile' className='mb-3'>
           <Form.Label>
-            <p style={{ fontSize: 'medium' }}>choose a .mid or .midi file</p>
+            <p style={{ fontSize: 'medium' }}>choose a .mid or .midi file to generate its best possible tabs!</p>
           </Form.Label>
           <Form.Control type='file' />
         </Form.Group>
