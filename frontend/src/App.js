@@ -108,7 +108,7 @@ export default function App () {
           About
         </Button>
       </header>
-      <Modal show={show} onHide={handleClose} centered>
+      <Modal show={show} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
