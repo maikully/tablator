@@ -47,10 +47,10 @@ def process_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], "temp.mid"))
 
     #return jsonify(d)
-    file = MidiFile(UPLOAD_FOLDER + "/" + filename, clip=True)
+    file = MidiFile(UPLOAD_FOLDER + "/" + "temp.mid", clip=True)
     notes = extract_notes(file)
     sequence = generate_fingerings(notes, STARTS, RANGES)
     final_paths = compute_path(sequence)
@@ -80,7 +80,7 @@ def process_file():
                             strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
                     strs[-1].append("\n")
             counter += 1
-    os.remove(UPLOAD_FOLDER + "/" + filename)
+    os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
     return jsonify(data=strs)
 
 @app.route('/')
