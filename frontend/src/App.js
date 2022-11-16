@@ -113,13 +113,13 @@ export default function App () {
           <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          For most notes within the range of the guitar, a guitarist has a
-          choice of which string to play the note on, as well as which finger to
-          use to fret the string. This choice greatly impacts the playability of
-          the passage: an easier fingering means an easier time playing. This
-          program uses a dynamic programming algorithm to find the three best
-          possible fingering sequences for a series of notes. To start, just
-          upload a midi file!
+          For every note within the range of the guitar, a guitarist must choose
+          which finger to use to fret the string and/or which string to play the
+          note on. This choice greatly impacts the playability of the passage:
+          an easier fingering means an easier time playing. This program uses a
+          dynamic programming algorithm to find the three best possible
+          fingering sequences for a sequence of notes. To start, just upload a
+          midi file!
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic midi files. For
