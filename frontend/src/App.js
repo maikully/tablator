@@ -17,8 +17,8 @@ export default function App () {
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
   const [midiFile, setFile] = useState(null)
-  const url = 'http://127.0.0.1/tablator'
-  //const url = 'https://tablator.herokuapp.com/tablator'
+  //const url = 'http://127.0.0.1/tablator'
+  const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const uploadFile = async e => {
