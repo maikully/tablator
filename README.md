@@ -7,7 +7,7 @@ App link: http://tablator.herokuapp.com
 
 When playing a passage, for every note, a guitarist must choose which finger to use to fret the string and, unless the note only can be played on one string, which string to play the note on. This choice greatly impacts the playability of the passage: a better fingering means an easier time playing.  This program uses a dynamic programming algorithm to find the three best possible fingering sequences for a sequence of notes. 
 
-The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Lower frets are also preferred over higher ones.
+The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret).
 
 Right now, only monophonic midi parts should be used for this program. For polyphonic beats (when two notes have the exact same note-on time), only one of the notes will be used.
 

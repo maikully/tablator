@@ -2,7 +2,7 @@ import time
 import os
 from io import BytesIO
 from mido import MidiFile
-from tab_creator import extract_notes, generate_fingerings, compute_cost, get_paths, tab_to_string, generate_tab_arr
+from tab_creator import extract_notes, generate_fingerings, compute_cost, get_paths, tab_to_string, generate_tab_arr, normalize_costs
 from flask import Flask, current_app, jsonify, request, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
@@ -122,6 +122,8 @@ def process_file():
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
+    print(costs)
+    costs = normalize_costs(costs, len(notes))
     ret = {"data": strs, "costs": costs}
     return ret
 

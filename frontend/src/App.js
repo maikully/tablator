@@ -12,6 +12,8 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import { BsDownload } from 'react-icons/bs'
 
 export default function App () {
+  //const url = 'http://127.0.0.1/tablator'
+  const url = 'https://tablator.herokuapp.com/tablator'
   const truncateDecimals = function (number, digits) {
     var multiplier = Math.pow(10, digits),
       adjustedNum = number * multiplier,
@@ -48,7 +50,10 @@ export default function App () {
     if (x === 2) setCustom(true)
     else setCustom(false)
   }
-
+  const map1 = new Map();
+  map1.set(0, "guitar");
+  map1.set(1, "bass");
+  map1.set(2, "custom");
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
   const [custom, setCustom] = useState(false)
@@ -66,8 +71,6 @@ export default function App () {
   const [midiFile, setFile] = useState(null)
   const [load, setLoading] = useState(false)
   const [alert, setAlert] = useState(false)
-  //const url = 'http://127.0.0.1/tablator'
-  const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const downloadTxtFile = tab => {
@@ -213,6 +216,7 @@ export default function App () {
                 Settings
               </Button>
             </div>
+            <p style={{marginTop:"1vh", fontSize:"large"}}>current instrument: {map1.get(radioValue)}</p>
           </Form.Group>
         </Form>
         {!midiFile && (

@@ -9,7 +9,7 @@ RANGES = [12, 12, 12, 14, 18, 18]
 TOTAL_RANGE = STRINGS[-1] - STRINGS[0] + RANGES[-1]
 
 """
-computer cost of transition between two positions
+compute cost of transition between two positions
 """
 def compute_cost(position1, position2):
     # cost for note itself (open string favored)
@@ -20,8 +20,17 @@ def compute_cost(position1, position2):
     # weigh the fret values themselves
     cost1 = np.sqrt(fret1 + fret2) * .1
     
-    return (fret2 - expected_fret)**2 + cost1
+    return (fret2 - expected_fret)**2
 
+"""
+convert list of costs to difficulty values
+"""
+def normalize_costs(costs, length):
+    normalized = []
+    for cost in costs:
+        max_cost_for_length = length * 16
+        normalized.append(cost/max_cost_for_length * 16)
+    return normalized
 
 """
 get all possible tabnotes for a given pitch
