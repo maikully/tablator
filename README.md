@@ -11,6 +11,7 @@ Todo:
 - [ ] time representation between notes can be improved
 - [ ] get chords working
 - [ ] double-digit frets being cut in half at wrap
+- [ ] display cost for tab
 - [x] notes after a long pause being cut off
 - [x] have tab length change based on screen width
 - [x] all three buttons showing with fewer than three versions available

@@ -2,17 +2,33 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
-import { Button, Form } from 'react-bootstrap'
+import { Button, Form, Modal } from 'react-bootstrap'
 import MidiPlayer from 'react-midi-player'
-import $ from "jquery";
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Tooltip from 'react-bootstrap/Tooltip'
+import $ from 'jquery'
+import Popover from 'react-bootstrap/Popover'
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
     accept: '.mid'
   })
+  const truncateDecimals = function (number, digits) {
+    var multiplier = Math.pow(10, digits),
+      adjustedNum = number * multiplier,
+      truncatedNum = Math[adjustedNum < 0 ? 'ceil' : 'floor'](adjustedNum)
+
+    return truncatedNum / multiplier
+  }
+  const handleClose = () => setShow(false)
+  const handleShow = () => setShow(true)
+  const [show, setShow] = useState(false)
   const [tab1, setTab1] = useState([])
   const [tab2, setTab2] = useState([])
   const [tab3, setTab3] = useState([])
+  const [cost1, setCost1] = useState(0)
+  const [cost2, setCost2] = useState(0)
+  const [cost3, setCost3] = useState(0)
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
@@ -37,18 +53,21 @@ export default function App () {
       console.log(width)
       let response = await fetch(url, {
         method: 'post',
-        body: data,
+        body: data
       })
       let res = await response.json()
-      console.log(res)
+      console.log(res.costs[2])
       if (res.data[0]) {
         setTab1(res.data[0])
+        setCost1(truncateDecimals(res.costs[0], 2))
       }
       if (res.data[1]) {
         setTab2(res.data[1])
+        setCost2(truncateDecimals(res.costs[1], 2))
       }
       if (res.data[2]) {
         setTab3(res.data[2])
+        setCost3(truncateDecimals(res.costs[2], 2))
       }
     }
   }
@@ -80,6 +99,38 @@ export default function App () {
 
   return (
     <div className='App'>
+      <header className='Upper-header'>
+        <Button
+          variant='secondary'
+          onClick={handleShow}
+          style={{ marginTop: '2vh', marginRight: '2vw' }}
+        >
+          About
+        </Button>
+      </header>
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title >About this project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          For most notes within the range of the guitar, a guitarist has a
+          choice of which string to play the note on. This choice greatly
+          impacts the playability of the passage: an easier fingering means an
+          easier time playing. This program uses a dynamic programming algorithm
+          to find the three best possible fingering sequences for a series of
+          notes. To start, just upload a midi file!
+          <br></br>
+          <br></br>
+          Currently, the program will only work on monophonic midi files. For
+          any polyphonic parts (if two consecutive notes have the exact same
+          note-on time), the program only uses one of the notes.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant='secondary' onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <header className='App-header'>
         <br></br>
         <h1>tablator</h1>
@@ -127,27 +178,81 @@ export default function App () {
         <br></br>
         {view1 && (
           <>
-          <h2>Tab 1</h2>
-          <div id="container">
-            <p className='tab'>{tab1.map(x => x + '\n')}</p>
-          </div>
+            <h2>Tab 1</h2>
+            <br></br>
+            <OverlayTrigger
+              placement={'left'}
+              overlay={
+                <Popover>
+                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                  <Popover.Body>
+                    This number represents the total cost of the fingering
+                    sequence for the current tab. The higher the cost, the
+                    harder the tab is to play.
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
+                cost: {cost1}
+              </Button>
+            </OverlayTrigger>
+            <div id='container'>
+              <p className='tab'>{tab1.map(x => x + '\n')}</p>
+            </div>
           </>
         )}
         {view2 && (
           <>
-          <h2>Tab 2</h2>
-          <div id="container">
-            <p className='tab'>{tab2.map(x => x + '\n')}</p>
-          </div>
+            <h2>Tab 2</h2>
+            <br></br>
+            <OverlayTrigger
+              placement={'left'}
+              overlay={
+                <Popover>
+                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                  <Popover.Body>
+                    This number represents the total cost of the fingering
+                    sequence for the current tab. The higher the cost, the
+                    harder the tab is to play.
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
+                cost: {cost2}
+              </Button>
+            </OverlayTrigger>
+            <div id='container'>
+              <p className='tab'>{tab2.map(x => x + '\n')}</p>
+            </div>
           </>
         )}
 
         {view3 && (
           <>
-          <h2>Tab 3</h2>
-          <div id="container">
-            <p className='tab'>{tab3.map(x => x + '\n')}</p>
-          </div>
+            <h2>Tab 3</h2>
+            <br></br>
+            <OverlayTrigger
+              placement={'left'}
+              overlay={
+                <Popover>
+                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                  <Popover.Body>
+                    This number represents the total cost of the fingering
+                    sequence for the current tab. The higher the cost, the
+                    harder the tab is to play.
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
+                cost: {cost3}
+              </Button>
+            </OverlayTrigger>
+            <div id='container'>
+              <p className='tab'>{tab3.map(x => x + '\n')}</p>
+            </div>
           </>
         )}
       </div>

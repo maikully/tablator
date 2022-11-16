@@ -46,6 +46,15 @@ h1 {
   font-size: calc(10px + 2vmin);
   color: white;
 }
+.Upper-header {
+  background-color: #282c34;
+  min-height: 5vh;
+  display: flex;
+  justify-content: right;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
 
 .App-link {
   color: #61dafb;

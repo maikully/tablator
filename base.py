@@ -55,6 +55,7 @@ def process_file():
     counter = 0
     seen = set()
     strs = []
+    costs = []
     for i, (cost, path) in enumerate(sorted_paths):
         if counter < 3:
             to_check = tuple([x[0] for x in path])
@@ -62,12 +63,12 @@ def process_file():
                 continue
             else:
                 seen.add(to_check)
+                costs.append(cost)
                 # get tab arr from path
                 tab_arr = generate_tab_arr(file, path)
                 strs.append([])
                 length = len(tab_arr[0])
                 line_length = screen_width // 12
-                print(line_length)
                 lines = length // line_length + 1
                 remainder = length & line_length - 1
                 if length < line_length:
@@ -86,7 +87,8 @@ def process_file():
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
-    return jsonify(data=strs)
+    ret = {"data": strs, "costs": costs}
+    return ret
 
 @app.route('/')
 def index():
