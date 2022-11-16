@@ -2,12 +2,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
-import { Button, Form, Modal } from 'react-bootstrap'
+import { Button, ToggleButton, Form, Modal } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
 import $ from 'jquery'
 import TabDisplay from './TabDisplay'
 import Spinner from 'react-bootstrap/Spinner'
+import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import { BsDownload } from 'react-icons/bs'
 
 export default function App () {
   const truncateDecimals = function (number, digits) {
@@ -40,7 +42,17 @@ export default function App () {
   }
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
+  const handleSettingsShow = x => setSettingsShow(x)
+  const setRadio = x => {
+    setRadioValue(x)
+    if (x === 2) setCustom(true)
+    else setCustom(false)
+  }
+
   const [show, setShow] = useState(false)
+  const [settingsShow, setSettingsShow] = useState(false)
+  const [custom, setCustom] = useState(false)
+  const [radioValue, setRadioValue] = useState(0)
   const [tab1, setTab1] = useState([])
   const [tab2, setTab2] = useState([])
   const [tab3, setTab3] = useState([])
@@ -86,12 +98,27 @@ export default function App () {
         setFile(data)
         //=> ArrayBuffer {byteLength: ...}
       })
-
       if (file != null) {
+        var instrument = ""
+        switch (radioValue) {
+          case 0:
+            instrument = 'guitar'
+            break
+          case 1:
+            instrument = 'bass'
+            break
+          case 2:
+            instrument = 'custom'
+            break
+          default:
+            instrument = ""
+            break
+        }
         const data = new FormData()
         const width = $(window).width()
         data.append('file', file)
         data.append('width', width)
+        data.append('instrument', instrument)
         setLoading(true)
         let response = await fetch(url, {
           method: 'post',
@@ -143,7 +170,7 @@ export default function App () {
           greatly impacts the playability of the passage: a better fingering
           means an easier time playing. This program uses a dynamic programming
           algorithm to find the three best possible fingering sequences for a
-          sequence of notes. To start, just upload a midi file!
+          sequence of notes. To start, choose an instrument in the settings and upload a midi file!
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic midi files. For
@@ -158,15 +185,149 @@ export default function App () {
       </Modal>
       <header className='App-header'>
         <h1>tablator</h1>
-        <br></br>
-        <Form.Group onChange={uploadFile} controlId='formFile' className='mb-3'>
-          <Form.Label>
-            <p style={{ fontSize: 'medium' }}>
-              choose a .mid or .midi file to generate its best possible tabs!
-            </p>
-          </Form.Label>
-          <Form.Control type='file' />
-        </Form.Group>
+        <Form>
+          <Form.Group
+            onChange={uploadFile}
+            controlId='formFile'
+            className='mb-3'
+          >
+            <Form.Label>
+              <p style={{ fontSize: 'medium' }}>
+                choose an instrument and upload a midi file to generate its best possible tabs!
+              </p>
+            </Form.Label>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                height: 'auto',
+                width: '30vw'
+              }}
+            >
+              <Form.Control type='file' style={{ width: '20vw' }} />{' '}
+              <Button
+                variant='secondary'
+                onClick={() => handleSettingsShow(true)}
+              >
+                Settings
+              </Button>
+            </div>
+          </Form.Group>
+        </Form>
+        {!midiFile && (
+          <a target='_blank' href='sample_monophonic_pentatonic.mid' download>
+            <Button variant='primary'>
+              <BsDownload></BsDownload> sample midi
+            </Button>
+          </a>
+        )}
+        <Modal show={settingsShow} onHide={() => handleSettingsShow(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Settings</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ButtonGroup className='mb-2'>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='radio'
+                key={0}
+                id={0}
+                value={0}
+                checked={radioValue === 0}
+                onChange={() => setRadio(0)}
+              >
+                Guitar
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='radio'
+                key={1}
+                id={1}
+                value={1}
+                checked={radioValue === 1}
+                onChange={() => setRadio(1)}
+              >
+                Bass
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='radio'
+                key={2}
+                id={2}
+                value={2}
+                checked={radioValue === 2}
+                onChange={() => setRadio(2)}
+              >
+                Custom
+              </ToggleButton>
+            </ButtonGroup>
+            {custom && (
+              <>
+                <Form.Label>
+                  <p style={{ fontSize: 'medium' }}>
+                    enter the six strings (including octave) from low to high
+                    <br></br>
+                    (e.g. E2 A2 D3 G3 B3 E4)
+                  </p>
+                </Form.Label>
+                <div style={{ display: 'flex' }}>
+                  <Form.Control
+                    type='text'
+                    placeholder='1'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+
+                  <Form.Control
+                    type='text'
+                    placeholder='2'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+
+                  <Form.Control
+                    type='text'
+                    placeholder='3'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+
+                  <Form.Control
+                    type='text'
+                    placeholder='4'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+
+                  <Form.Control
+                    type='text'
+                    placeholder='5'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+
+                  <Form.Control
+                    type='text'
+                    placeholder='6'
+                    maxLength='2'
+                    style={{ width: '3em' }}
+                  />
+                </div>
+              </>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant='secondary'
+              onClick={() => handleSettingsShow(false)}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
         {alert && (
           <Alert
             style={{
@@ -180,15 +341,8 @@ export default function App () {
             File extension not .mid or .midi!
           </Alert>
         )}
-        {!midiFile && (
-          <a target="_blank" href='sample_monophonic_pentatonic.mid' download>
-            <Button variant='primary'>download sample midi</Button>{' '}
-          </a>
-        )}
         {load && (
-          <>
             <Spinner animation='border' variant='primary' />
-          </>
         )}
         <div>
           {tab1.length > 0 && !load && (

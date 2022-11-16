@@ -7,11 +7,15 @@ from flask import Flask, current_app, jsonify, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 
-RANGES = [12, 12, 12, 14, 18, 18]  # fret range of each string
+RANGES_GUITAR = [12, 12, 12, 14, 18, 18]  # fret range of each string
+RANGES_BASS = [18, 18, 18, 18]  # fret range of each string
 # STARTS = [53,58,63,68,72,77] # starts on first fret of each string
-STARTS = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string
-TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
-STRINGS = ["E", "B", "G", "D", "A", "E"]
+STARTS_GUITAR = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string - guitar
+STARTS_BASS = [28, 33, 38, 43]  # starts on first fret of each string - bass
+TOTAL_GUITAR_RANGE = STARTS_GUITAR[-1] - STARTS_GUITAR[0] + RANGES_GUITAR[-1]
+TOTAL_BASS_RANGE = STARTS_BASS[-1] - STARTS_BASS[0] + RANGES_BASS[-1]
+STRINGS_GUITAR = ["E", "B", "G", "D", "A", "E"]
+STRINGS_BASS = ["G", "D", "A", "E"]
 UPLOAD_FOLDER = './midi_files'
 
 app = Flask(__name__ 
@@ -30,6 +34,21 @@ def allowed_file(filename):
 @cross_origin()
 def process_file():
     screen_width = int(request.form["width"])
+    starts = None
+    ranges = None
+    strings = None
+    instrument = request.form["instrument"]
+    if instrument == "guitar":
+        starts = STARTS_GUITAR
+        ranges = RANGES_GUITAR
+        strings = STRINGS_GUITAR
+        total_range = TOTAL_GUITAR_RANGE
+    elif instrument == "bass":
+        starts = STARTS_BASS
+        ranges = RANGES_BASS
+        strings = STRINGS_BASS
+        total_range = TOTAL_BASS_RANGE
+    num_strings = len(strings)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -47,8 +66,9 @@ def process_file():
 
     #return jsonify(d)
     file = MidiFile(UPLOAD_FOLDER + "/" + "temp.mid", clip=True)
-    notes = extract_notes(file)
-    sequence = generate_fingerings(notes, STARTS, RANGES)
+    notes = extract_notes(file, starts, total_range)
+    print(notes)
+    sequence = generate_fingerings(notes, starts, ranges)
     final_paths = get_paths(sequence)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
     # take top three paths
@@ -65,7 +85,8 @@ def process_file():
                 seen.add(to_check)
                 costs.append(cost)
                 # get tab arr from path
-                tab_arr = generate_tab_arr(file, path)
+                print(path)
+                tab_arr = generate_tab_arr(file, path, num_strings)
                 strs.append([])
                 length = len(tab_arr[0])
                 line_length = screen_width // 12
@@ -73,7 +94,7 @@ def process_file():
                 remainder = length % line_length - 1
                 if length < line_length:
                     for i,y in enumerate(tab_arr):
-                        strs[-1].append(STRINGS[i] + "|" + "".join(y))
+                        strs[-1].append(strings[i] + "|" + "".join(y) + "|")
                 else:
                     # flag represents which string should have its first digit removed
                     flag = None
@@ -82,19 +103,19 @@ def process_file():
                             # if a two-digit fret is being cut off
                             if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
                                 if flag == i:
-                                    strs[-1].append(STRINGS[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1] +"|")
+                                    strs[-1].append(strings[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1])
                                 else:
-                                    strs[-1].append(STRINGS[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length + 1] +"|")
+                                    strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length + 1])
                                 flag = i
                             else:
                                 if flag == i:
-                                    strs[-1].append(STRINGS[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] +"|")
+                                    strs[-1].append(strings[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] + "|")
                                     flag = None
                                 else:
-                                    strs[-1].append(STRINGS[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
+                                    strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
                         strs[-1].append("\n")
                     for i,z in enumerate(tab_arr):
-                        strs[-1].append(STRINGS[i] + "|" + "".join(z)[(n+1) * line_length:]  +"|")
+                        strs[-1].append(strings[i] + "|" + "".join(z)[(n+1) * line_length:]  +"|")
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")

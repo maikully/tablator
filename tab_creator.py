@@ -107,19 +107,23 @@ def get_all_tab_monophonic(file):
 """ 
 shift a note into fuitar range
 """
-def correct_note(note):
-    lower_bound = STRINGS[0]
-    upper_bound = STRINGS[0] + TOTAL_RANGE
+def correct_note(note, starts, total_range):
+    lower_bound = starts[0]
+    upper_bound = starts[0] + total_range
     if note < lower_bound:
+        #print("too low")
+        #print((note - lower_bound) % 12 + lower_bound)
         return (note - lower_bound) % 12 + lower_bound
     elif note > upper_bound:
+        #print("too high")
+        #print(upper_bound - (upper_bound - note) % 12)
         return upper_bound - (upper_bound - note) % 12
     return note
 
 """
 get all (polyphonic) notes from a file
 """
-def extract_notes(file):
+def extract_notes(file, starts, total_range):
     notes = []
     prev = None
     for i, x in enumerate(file):
@@ -129,9 +133,9 @@ def extract_notes(file):
         else:
             if x.type == "note_on":
                 if prev and prev.type == "note_on" and x.time == 0:
-                    notes[-1].append(correct_note(x.note))
+                    notes[-1].append(correct_note(x.note, starts, total_range))
                 else:
-                    notes.append([correct_note(x.note)])
+                    notes.append([correct_note(x.note, starts, total_range)])
         prev = x
     return notes
 
@@ -159,10 +163,10 @@ def get_paths(sequence):
 """
 generate a tab_arr from a file and a given path
 """
-def generate_tab_arr(file, best_path):
+def generate_tab_arr(file, best_path, num_strings):
     prev = None
     note_counter = 0
-    output = [[], [], [], [], [], []]
+    output = [[] for x in range(num_strings)]
     for i, x in enumerate(file):
         if isinstance(x, MetaMessage):
             # print(x)
@@ -196,10 +200,11 @@ def generate_tab_arr(file, best_path):
 generates sequences of possible fingerings for each note
 """
 def generate_fingerings(notes, starts, ranges):
+    num_strings = len(starts)
     string_d = defaultdict(list)
     for i, start in enumerate(starts):
         for j in range(ranges[i] + 1):
-            string_d[start+j] += [(5 - i, j)]
+            string_d[start+j] += [((num_strings - 1) - i, j)]
     sequence = []
     # build all possible (string,fret,finger) fingerings of each note in order
     for i, note in enumerate(notes):
