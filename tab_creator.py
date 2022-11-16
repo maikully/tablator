@@ -3,39 +3,43 @@ import numpy as np
 from mido import MidiFile, Message, MetaMessage
 from collections import defaultdict
 
-strings = [64, 59, 55, 50, 45, 40]
-fingers = [0, 1, 2, 3]
-RANGES = [12, 12, 12, 14, 18, 18]  # fret range of each string
-# STARTS = [53,58,63,68,72,77] # starts on first fret of each string
-STARTS = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string
+STRINGS = [64, 59, 55, 50, 45, 40]
+FINGERS = [0, 1, 2, 3]
+RANGES = [12, 12, 12, 14, 18, 18] 
+STARTS = [40, 45, 50, 55, 59, 64]
 TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
 
-
+"""
+computer cost of transition between two positions
+"""
 def compute_cost(position1, position2):
     # cost for note itself (open string favored)
     string1, fret1, finger1 = position1
     string2, fret2, finger2 = position2
     expected_fret = fret1 + (finger2 - finger1)
+
+    # weigh the fret values themselves
     cost1 = np.sqrt(fret1 + fret2) * .1
     
     return (fret2 - expected_fret)**2 + cost1
 
-# get all possible tabnotes for a given pitch
 
-
+"""
+get all possible tabnotes for a given pitch
+"""
 def get_all_possible_notes(curr_note):
     possible_notes = []
     unused_strings = []
-    for i, string in enumerate(strings):
+    for i, string in enumerate(STRINGS):
         if curr_note >= string and curr_note - string < 25:
-            possible_notes.append(TabNote(curr_note - string, i, 0))
+            possible_notes.append((curr_note - string, i, 0))
         else:
             unused_strings.append(i)
     return (possible_notes, unused_strings)
 
-# write a tab_arr to file
-
-
+"""
+write a tab_arr to file
+"""
 def write_tab(tab_arr, filepath):
     f = open(filepath, "w")
     length = len(tab_arr[0])
@@ -49,9 +53,9 @@ def write_tab(tab_arr, filepath):
 
     f.close()
 
-# concert tab to string
-
-
+"""
+convert a tab_arr to a string
+"""
 def tab_to_string(tab_arr):
     str = ""
     for y in tab_arr:
@@ -60,7 +64,9 @@ def tab_to_string(tab_arr):
     return str
 
 
-# create tab_arr that contains the fretting for every possible string for each note
+"""
+create tab_arr that includes frettings on every possible string for every note in a monophonic file
+"""
 def get_all_tab_monophonic(file):
     output = [[], [], [], [], [], []]
     num_notes = 0
@@ -99,9 +105,9 @@ def get_all_tab_monophonic(file):
                     #prev_note = curr_note
     return (output, num_notes, notes)
 
-# correct a note that is out of range
-
-
+""" 
+shift a note into fuitar range
+"""
 def correct_note(note):
     lower_bound = STARTS[0]
     upper_bound = STARTS[0] + TOTAL_RANGE
@@ -111,9 +117,9 @@ def correct_note(note):
         return upper_bound - (upper_bound - note) % 12
     return note
 
-# get all notes in file, polyphonic
-
-
+"""
+get all (polyphonic) notes from a file
+"""
 def extract_notes(file):
     notes = []
     prev = None
@@ -130,8 +136,10 @@ def extract_notes(file):
         prev = x
     return notes
 
-
-def compute_path(sequence):
+"""
+find the costs and paths in the sequence
+"""
+def get_paths(sequence):
     final_paths = defaultdict(dict)
     # set one-note paths to zero cost
     final_paths[0] = dict(zip(sequence[0], [(0, [seq])
@@ -149,7 +157,9 @@ def compute_path(sequence):
             final_paths[i+1][position] = (min, path)
     return final_paths[i+1]
 
-
+"""
+generate a tab_arr from a file and a given path
+"""
 def generate_tab_arr(file, best_path):
     prev = None
     note_counter = 0
@@ -184,17 +194,20 @@ def generate_tab_arr(file, best_path):
     return (output)
 
 
+"""
+generates sequences of possible fingerings for each note
+"""
 def generate_fingerings(notes, starts, ranges):
     string_d = defaultdict(list)
-    for i, start in enumerate(STARTS):
-        for j in range(RANGES[i] + 1):
+    for i, start in enumerate(starts):
+        for j in range(ranges[i] + 1):
             string_d[start+j] += [(5 - i, j)]
     sequence = []
     # build all possible (string,fret,finger) fingerings of each note in order
     for i, note in enumerate(notes):
-        tups = string_d[note[0]]
-        sequence += [[(s, fret, finger)
-                      for s, fret in tups for finger in fingers]]
+        note_fingering = string_d[note[0]]
+        sequence += [[(string, fret, finger)
+                      for string, fret in note_fingering for finger in FINGERS]]
     return sequence
 
 
@@ -205,7 +218,7 @@ def main():
     #output, num_notes, notes = get_all_tab_monophonic(file)
     notes = extract_notes(file)
     sequence = generate_fingerings(notes, STARTS, RANGES)
-    final_paths = compute_path(sequence)
+    final_paths = get_paths(sequence)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
     # take top three paths
     counter = 0
@@ -221,23 +234,6 @@ def main():
                 write_tab(tab_arr, str(i) + " cost " + str(cost))
             counter += 1
 
-
-class TabNote:
-    def __init__(self, fret, string, finger):
-        self.fret = fret  # number from 0 to 23
-        self.string = string  # number from 0 to 5, where 0 is high E
-        self.finger = finger  # number from 0 to 3
-        # self.note = note  # number from 0 to 127
-        # guitar notes range from E2 (40)
-
-    def getFret(self):
-        return self.fret
-
-    def getString(self):
-        return self.string
-
-    def getFinger(self):
-        return self.finger
 
 
 if __name__ == "__main__":

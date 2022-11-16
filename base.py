@@ -2,7 +2,7 @@ import time
 import os
 from io import BytesIO
 from mido import MidiFile
-from tab_creator import extract_notes, generate_fingerings, compute_cost, compute_path, tab_to_string, generate_tab_arr
+from tab_creator import extract_notes, generate_fingerings, compute_cost, get_paths, tab_to_string, generate_tab_arr
 from flask import Flask, current_app, jsonify, request, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
@@ -26,11 +26,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/time')
-def get_current_time():
-    return {'time': time.time()}
-
-
 @app.route('/tablator', methods=["POST"], strict_slashes=False)
 @cross_origin()
 def process_file():
@@ -53,7 +48,7 @@ def process_file():
     file = MidiFile(UPLOAD_FOLDER + "/" + "temp.mid", clip=True)
     notes = extract_notes(file)
     sequence = generate_fingerings(notes, STARTS, RANGES)
-    final_paths = compute_path(sequence)
+    final_paths = get_paths(sequence)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
     # take top three paths
     counter = 0
