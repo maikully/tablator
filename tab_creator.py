@@ -28,8 +28,9 @@ convert list of costs to difficulty values
 def normalize_costs(costs, length):
     normalized = []
     for cost in costs:
-        max_cost_for_length = length * 16
-        normalized.append(cost/max_cost_for_length * 16)
+        max_cost_for_length = length * 9
+        print(max_cost_for_length)
+        normalized.append(cost/max_cost_for_length * 100)
     return normalized
 
 """

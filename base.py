@@ -112,10 +112,6 @@ def process_file():
                                 else:
                                     strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
                         strs[-1].append("\n")
-                    print((n + 1) * line_length)
-                    print(length)
-                    print(line_length)
-                    print(remainder)
                     if remainder > 0:
                         for i,z in enumerate(tab_arr):
                             strs[-1].append(strings[i] + "|" + "".join(z)[(n + 1) * line_length:(n + 1) * line_length + remainder + 2]  +"|")
