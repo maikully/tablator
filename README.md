@@ -15,8 +15,9 @@ Todo:
 
 - [ ] time representation between notes can be improved
 - [ ] get chords working
-- [ ] double-digit frets being cut in half at wrap
 - [ ] display note fingerings alongside note
+- [ ] add option to not prioritize open strings or lower frets  
+- [x] double-digit frets being cut in half at wrap
 - [x] add sample midi
 - [x] download buttons for tabs
 - [x] display cost for tab

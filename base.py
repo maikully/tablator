@@ -75,15 +75,26 @@ def process_file():
                     for i,y in enumerate(tab_arr):
                         strs[-1].append(STRINGS[i] + "|" + "".join(y))
                 else:
+                    # flag represents which string should have its first digit removed
+                    flag = None
                     for n in range(lines):
-                        for i,y in enumerate(tab_arr):
-                            if n == 0:
-                                strs[-1].append(STRINGS[i] + "|" + "".join(y)[n * line_length: (n + 1) * line_length] )
+                        for i,string in enumerate(tab_arr):
+                            # if a two-digit fret is being cut off
+                            if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
+                                if flag == i:
+                                    strs[-1].append(STRINGS[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1] +"|")
+                                else:
+                                    strs[-1].append(STRINGS[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length + 1] +"|")
+                                flag = i
                             else:
-                                strs[-1].append("".join(y)[n * line_length: (n + 1) * line_length] )
+                                if flag == i:
+                                    strs[-1].append(STRINGS[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] +"|")
+                                    flag = None
+                                else:
+                                    strs[-1].append(STRINGS[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
                         strs[-1].append("\n")
                     for i,z in enumerate(tab_arr):
-                        strs[-1].append("".join(z)[(n+1) * line_length:] )
+                        strs[-1].append(STRINGS[i] + "|" + "".join(z)[(n+1) * line_length:]  +"|")
                 
             counter += 1
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")

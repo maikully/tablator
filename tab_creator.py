@@ -124,7 +124,7 @@ def extract_notes(file):
     prev = None
     for i, x in enumerate(file):
         if isinstance(x, MetaMessage):
-            print(x)
+            #print(x)
             pass
         else:
             if x.type == "note_on":
@@ -223,7 +223,6 @@ def main():
     seen = set()
     for i, (cost, path) in enumerate(sorted_paths):
         if counter < 3:
-            print([x[0] for x in path])
             to_check = tuple([x[0] for x in path])
             if to_check in seen:
                 continue
