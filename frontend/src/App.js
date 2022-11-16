@@ -207,11 +207,11 @@ export default function App () {
               style={{
                 display: 'flex',
                 justifyContent: 'center',
+                alignItems: 'center',
                 height: 'auto',
-                width: '30vw'
               }}
             >
-              <Form.Control type='file' style={{ width: '20vw' }} />{' '}
+              <Form.Control type='file'  />{' '}
               <Button
                 variant='secondary'
                 onClick={() => handleSettingsShow(true)}
