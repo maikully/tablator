@@ -10,5 +10,6 @@ The cost function for the transition between two notes is calculated using the d
 Todo:
 - [ ] time representation between notes can be improved
 - [ ] get chords working
-- [x] notes too far in time being cut off
+- [ ] double-digit frets being cut in half at wrap
+- [x] notes after a long pause being cut off
 - [x] all three buttons showing with fewer than three versions available
