@@ -12,7 +12,7 @@ RANGES = [12, 12, 12, 14, 18, 18]  # fret range of each string
 STARTS = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string
 TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
 STRINGS = ["E", "B", "G", "D", "A", "E"]
-UPLOAD_FOLDER = 'midi_files'
+UPLOAD_FOLDER = './midi_files'
 
 app = Flask(__name__ 
     ,static_folder='./frontend/build',static_url_path='/')
