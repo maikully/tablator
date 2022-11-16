@@ -3,99 +3,19 @@ import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
 import { Button, Form, Modal } from 'react-bootstrap'
+import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
-import Tooltip from 'react-bootstrap/Tooltip'
 import $ from 'jquery'
-import Popover from 'react-bootstrap/Popover'
 import TabDisplay from './TabDisplay'
 import Spinner from 'react-bootstrap/Spinner'
 
 export default function App () {
-  const [openFileSelector, { filesContent, loading }] = useFilePicker({
-    accept: '.mid'
-  })
   const truncateDecimals = function (number, digits) {
     var multiplier = Math.pow(10, digits),
       adjustedNum = number * multiplier,
       truncatedNum = Math[adjustedNum < 0 ? 'ceil' : 'floor'](adjustedNum)
 
     return truncatedNum / multiplier
-  }
-  const handleClose = () => setShow(false)
-  const handleShow = () => setShow(true)
-  const [show, setShow] = useState(false)
-  const [tab1, setTab1] = useState([])
-  const [tab2, setTab2] = useState([])
-  const [tab3, setTab3] = useState([])
-  const [cost1, setCost1] = useState(0)
-  const [cost2, setCost2] = useState(0)
-  const [cost3, setCost3] = useState(0)
-  const [view1, setView1] = useState(false)
-  const [view2, setView2] = useState(false)
-  const [view3, setView3] = useState(false)
-  const [filename, setFilename] = useState('')
-  const [midiFile, setFile] = useState(null)
-  const [load, setLoading] = useState(false)
-  //const url = 'http://127.0.0.1/tablator'
-  const url = 'https://tablator.herokuapp.com/tablator'
-  // the react post request sender
-  const fileToArrayBuffer = require('file-to-array-buffer')
-  const downloadTxtFile = tab => {
-    const element = document.createElement('a')
-    const file = new Blob(
-      tab.map(x => x + '\n'),
-      {
-        type: 'text/plain'
-      }
-    )
-    element.href = URL.createObjectURL(file)
-    element.download = filename + '.txt'
-    document.body.appendChild(element) // Required for this to work in FireFox
-    element.click()
-  }
-  const uploadFile = async e => {
-    const file = e.target.files[0]
-    setFilename(e.target.files[0].name.replace(/\.[^/.]+$/, ''))
-    fileToArrayBuffer(file).then(data => {
-      console.log(data)
-      setFile(data)
-      //=> ArrayBuffer {byteLength: ...}
-    })
-
-    if (file != null) {
-      const data = new FormData()
-      const width = $(window).width()
-      data.append('file', file)
-      data.append('width', width)
-      console.log(width)
-      setLoading(true)
-      let response = await fetch(url, {
-        method: 'post',
-        body: data
-      })
-      let res = await response.json()
-      console.log(res.costs[2])
-      setLoading(false)
-      if (res.data[0]) {
-        setTab1(res.data[0])
-        setCost1(truncateDecimals(res.costs[0], 2))
-      } else {
-        setTab1([])
-      }
-      if (res.data[1]) {
-        setTab2(res.data[1])
-        setCost2(truncateDecimals(res.costs[1], 2))
-      } else {
-        setTab2([])
-      }
-      if (res.data[2]) {
-        setTab3(res.data[2])
-        setCost3(truncateDecimals(res.costs[2], 2))
-      } else {
-        setTab3([])
-      }
-    }
   }
   const handleChange = i => {
     switch (i) {
@@ -118,9 +38,87 @@ export default function App () {
         break
     }
   }
+  const handleClose = () => setShow(false)
+  const handleShow = () => setShow(true)
+  const [show, setShow] = useState(false)
+  const [tab1, setTab1] = useState([])
+  const [tab2, setTab2] = useState([])
+  const [tab3, setTab3] = useState([])
+  const [cost1, setCost1] = useState(0)
+  const [cost2, setCost2] = useState(0)
+  const [cost3, setCost3] = useState(0)
+  const [view1, setView1] = useState(false)
+  const [view2, setView2] = useState(false)
+  const [view3, setView3] = useState(false)
+  const [filename, setFilename] = useState('')
+  const [midiFile, setFile] = useState(null)
+  const [load, setLoading] = useState(false)
+  const [alert, setAlert] = useState(false)
+  //const url = 'http://127.0.0.1/tablator'
+  const url = 'https://tablator.herokuapp.com/tablator'
+  // the react post request sender
+  const fileToArrayBuffer = require('file-to-array-buffer')
+  const downloadTxtFile = tab => {
+    const element = document.createElement('a')
+    const file = new Blob(
+      tab.map(x => x + '\n'),
+      {
+        type: 'text/plain'
+      }
+    )
+    element.href = URL.createObjectURL(file)
+    element.download = filename + '.txt'
+    document.body.appendChild(element) // Required for this to work in FireFox
+    element.click()
+  }
+  const uploadFile = async e => {
+    const file = e.target.files[0]
+    const extension = e.target.files[0].name
+      .split('.')
+      .pop()
+      .toLowerCase()
+      .trim()
+    if (extension !== 'mid' && extension !== 'midi') {
+      setAlert(true)
+    } else {
+      setAlert(false)
+      fileToArrayBuffer(file).then(data => {
+        setFile(data)
+        //=> ArrayBuffer {byteLength: ...}
+      })
 
-  if (loading) {
-    return <div>Loading...</div>
+      if (file != null) {
+        const data = new FormData()
+        const width = $(window).width()
+        data.append('file', file)
+        data.append('width', width)
+        setLoading(true)
+        let response = await fetch(url, {
+          method: 'post',
+          body: data
+        })
+        let res = await response.json()
+        setLoading(false)
+        if (res.data[0]) {
+          setTab1(res.data[0])
+          setCost1(truncateDecimals(res.costs[0], 2))
+        } else {
+          setTab1([])
+        }
+        if (res.data[1]) {
+          setTab2(res.data[1])
+          setCost2(truncateDecimals(res.costs[1], 2))
+        } else {
+          setTab2([])
+        }
+        if (res.data[2]) {
+          setTab3(res.data[2])
+          setCost3(truncateDecimals(res.costs[2], 2))
+        } else {
+          setTab3([])
+        }
+      }
+    }
   }
 
   return (
@@ -169,15 +167,28 @@ export default function App () {
           </Form.Label>
           <Form.Control type='file' />
         </Form.Group>
+        {alert && (
+          <Alert
+            style={{
+              display: 'inline-block',
+              padding: '5px',
+              fontSize: 'small'
+            }}
+            key={'warning'}
+            variant={'warning'}
+          >
+            File extension not .mid or .midi!
+          </Alert>
+        )}
         {!midiFile && (
           <a href='sample_monophonic_pentatonic.mid'>
             <Button variant='primary'>download sample midi</Button>{' '}
           </a>
         )}
         {load && (
-    <>
-      <Spinner animation="border" variant="primary" />
-    </>
+          <>
+            <Spinner animation='border' variant='primary' />
+          </>
         )}
         <div>
           {tab1.length > 0 && !load && (

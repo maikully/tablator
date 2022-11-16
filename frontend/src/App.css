@@ -5,6 +5,9 @@
 html {
   background-color: #f3f7d6;
 }
+body {
+  background-color: #f3f7d6;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -41,7 +44,6 @@ h1 {
 
 .App-header {
   background-color: #282c34;
-  min-height: 33vh;
   display: flex;
   flex-direction: column;
   align-items: center;
