@@ -12,4 +12,5 @@ Todo:
 - [ ] get chords working
 - [ ] double-digit frets being cut in half at wrap
 - [x] notes after a long pause being cut off
+- [x] have tab length change based on screen width
 - [x] all three buttons showing with fewer than three versions available
