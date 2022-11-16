@@ -1,9 +1,9 @@
 # Tablator
-App that converts a midi file into a guitar tab. Uses a DP algorithm to get the three best fingering paths, also representing time differences between notes.
+App that converts a midi file into a guitar tab. Uses a DP algorithm to get the three best fingering paths, where each fingering is represented by a string, fret, and finger. Also represents time differences between notes with additional dashes.
 
 Frontend served at http://tablator.herokuapp.com
 
-Right now, monophonic midi parts should be used for this program. If there are any polyphonic parts (i.e. two notes have the exact same note-on time), only one of the notes will be counted for.
+Right now, only monophonic midi parts should be used for this program. For polyphonic beats (when two notes have the exact same note-on time), only one of the notes will be used.
 
 The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Lower frets are also preferred over higher ones.
 
