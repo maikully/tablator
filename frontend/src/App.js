@@ -110,15 +110,16 @@ export default function App () {
       </header>
       <Modal show={show} onHide={handleClose} centered>
         <Modal.Header closeButton>
-          <Modal.Title >About this project</Modal.Title>
+          <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           For most notes within the range of the guitar, a guitarist has a
-          choice of which string to play the note on. This choice greatly
-          impacts the playability of the passage: an easier fingering means an
-          easier time playing. This program uses a dynamic programming algorithm
-          to find the three best possible fingering sequences for a series of
-          notes. To start, just upload a midi file!
+          choice of which string to play the note on, as well as which finger to
+          use to fret the string. This choice greatly impacts the playability of
+          the passage: an easier fingering means an easier time playing. This
+          program uses a dynamic programming algorithm to find the three best
+          possible fingering sequences for a series of notes. To start, just
+          upload a midi file!
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic midi files. For
@@ -132,7 +133,6 @@ export default function App () {
         </Modal.Footer>
       </Modal>
       <header className='App-header'>
-        <br></br>
         <h1>tablator</h1>
         <br></br>
         <Form.Group onChange={uploadFile} controlId='formFile' className='mb-3'>
@@ -167,15 +167,14 @@ export default function App () {
           )}
           <br></br>
         </div>
-        {midiFile && (
-          <MidiPlayer
-            style={{ marginTop: '20px', marginBottom: '5vh' }}
-            data={midiFile}
-          ></MidiPlayer>
-        )}
       </header>
       <div>
         <br></br>
+        {midiFile && (
+          <div style={{ marginBottom: '3vh' }}>
+            <MidiPlayer data={midiFile}></MidiPlayer>
+          </div>
+        )}
         {view1 && (
           <>
             <h2>Tab 1</h2>
