@@ -35,7 +35,7 @@ pip3 install -r requirements.txt
 python3 base.py
 ```
 
-Todo:
+### Todo:
 
 - [ ] time representation between notes can be improved
 - [ ] get chords working
