@@ -260,6 +260,7 @@ export default function App () {
                 type='radio'
                 variant='secondary'
                 name='radio'
+                disabled
                 key={2}
                 id={2}
                 value={2}
