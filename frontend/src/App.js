@@ -50,10 +50,10 @@ export default function App () {
     if (x === 2) setCustom(true)
     else setCustom(false)
   }
-  const map1 = new Map();
-  map1.set(0, "guitar");
-  map1.set(1, "bass");
-  map1.set(2, "custom");
+  const map1 = new Map()
+  map1.set(0, 'guitar')
+  map1.set(1, 'bass')
+  map1.set(2, 'custom')
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
   const [custom, setCustom] = useState(false)
@@ -102,7 +102,7 @@ export default function App () {
         //=> ArrayBuffer {byteLength: ...}
       })
       if (file != null) {
-        var instrument = ""
+        var instrument = ''
         switch (radioValue) {
           case 0:
             instrument = 'guitar'
@@ -114,7 +114,7 @@ export default function App () {
             instrument = 'custom'
             break
           default:
-            instrument = ""
+            instrument = ''
             break
         }
         const data = new FormData()
@@ -174,12 +174,14 @@ export default function App () {
           greatly impacts the playability of the passage: a better fingering
           means an easier time playing. This program uses a dynamic programming
           algorithm to find the three best possible fingering sequences for a
-          sequence of notes. To start, choose an instrument in the settings and upload a midi file!
+          sequence of notes. To start, choose an instrument in the settings and
+          upload a midi file!
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic midi files. For
           any polyphonic parts (if two consecutive notes have the exact same
-          note-on time), the program only uses one of the notes.
+          note-on time), the program only uses one of the notes. Any notes
+          outside the range of the chosen instrument will be octave-shifted in.
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>
@@ -197,7 +199,8 @@ export default function App () {
           >
             <Form.Label>
               <p style={{ fontSize: 'medium' }}>
-                choose an instrument and upload a midi file to generate its best possible tabs!
+                choose an instrument and upload a midi file to generate its best
+                possible tabs!
               </p>
             </Form.Label>
             <div
@@ -216,7 +219,9 @@ export default function App () {
                 Settings
               </Button>
             </div>
-            <p style={{marginTop:"1vh", fontSize:"large"}}>current instrument: {map1.get(radioValue)}</p>
+            <p style={{ marginTop: '1vh', fontSize: 'large' }}>
+              current instrument: {map1.get(radioValue)}
+            </p>
           </Form.Group>
         </Form>
         {!midiFile && (
@@ -347,9 +352,7 @@ export default function App () {
             File extension not .mid or .midi!
           </Alert>
         )}
-        {load && (
-            <Spinner animation='border' variant='primary' />
-        )}
+        {load && <Spinner animation='border' variant='primary' />}
         <div>
           {tab1.length > 0 && !load && (
             <>
