@@ -3,11 +3,10 @@ import numpy as np
 from mido import MidiFile, Message, MetaMessage
 from collections import defaultdict
 
-STRINGS = [64, 59, 55, 50, 45, 40]
+STRINGS = [40, 45, 50, 55, 59, 64]
 FINGERS = [0, 1, 2, 3]
 RANGES = [12, 12, 12, 14, 18, 18] 
-STARTS = [40, 45, 50, 55, 59, 64]
-TOTAL_RANGE = STARTS[-1] - STARTS[0] + RANGES[-1]
+TOTAL_RANGE = STRINGS[-1] - STRINGS[0] + RANGES[-1]
 
 """
 computer cost of transition between two positions
@@ -30,7 +29,7 @@ get all possible tabnotes for a given pitch
 def get_all_possible_notes(curr_note):
     possible_notes = []
     unused_strings = []
-    for i, string in enumerate(STRINGS):
+    for i, string in enumerate(reversed(STRINGS)):
         if curr_note >= string and curr_note - string < 25:
             possible_notes.append((curr_note - string, i, 0))
         else:
@@ -109,8 +108,8 @@ def get_all_tab_monophonic(file):
 shift a note into fuitar range
 """
 def correct_note(note):
-    lower_bound = STARTS[0]
-    upper_bound = STARTS[0] + TOTAL_RANGE
+    lower_bound = STRINGS[0]
+    upper_bound = STRINGS[0] + TOTAL_RANGE
     if note < lower_bound:
         return (note - lower_bound) % 12 + lower_bound
     elif note > upper_bound:
@@ -217,7 +216,7 @@ def main():
     output = [[], [], [], [], [], []]
     #output, num_notes, notes = get_all_tab_monophonic(file)
     notes = extract_notes(file)
-    sequence = generate_fingerings(notes, STARTS, RANGES)
+    sequence = generate_fingerings(notes, STRINGS, RANGES)
     final_paths = get_paths(sequence)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
     # take top three paths
