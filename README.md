@@ -7,7 +7,8 @@ Right now, monophonic midi parts should be used for this program. If there are a
 
 The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Lower frets are also preferred over higher ones.
 
-- [x] notes too far in time being cut off
-- [x] all three buttons showing with fewer than three versions available
+Issues:
 - [ ] time representation between notes can be improved
 - [ ] get chords working
+- [x] notes too far in time being cut off
+- [x] all three buttons showing with fewer than three versions available
