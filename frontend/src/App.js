@@ -129,12 +129,12 @@ export default function App () {
         </Modal.Header>
         <Modal.Body>
           When playing a passage, for every note, a guitarist must choose which
-          finger to use to fret the string and/or which string to play the note
-          on. This choice greatly impacts the playability of the passage: a
-          better fingering means an easier time playing. This program uses a
-          dynamic programming algorithm to find the three best possible
-          fingering sequences for a sequence of notes. To start, just upload a
-          midi file!
+          finger to use to fret the string and, unless the note only can be
+          played on one string, which string to play the note on. This choice
+          greatly impacts the playability of the passage: a better fingering
+          means an easier time playing. This program uses a dynamic programming
+          algorithm to find the three best possible fingering sequences for a
+          sequence of notes. To start, just upload a midi file!
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic midi files. For
