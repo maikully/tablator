@@ -32,13 +32,25 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
+  const [filename, setFilename] = useState("")
   const [midiFile, setFile] = useState(null)
   //const url = 'http://127.0.0.1/tablator'
   const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
+  const downloadTxtFile = (tab) => {
+    const element = document.createElement('a')
+    const file = new Blob(tab.map(x => x + '\n'), {
+      type: 'text/plain'
+    })
+    element.href = URL.createObjectURL(file)
+    element.download = filename + '.txt'
+    document.body.appendChild(element) // Required for this to work in FireFox
+    element.click()
+  }
   const uploadFile = async e => {
     const file = e.target.files[0]
+    setFilename(e.target.files[0].name.replace(/\.[^/.]+$/, ""))
     fileToArrayBuffer(file).then(data => {
       console.log(data)
       setFile(data)
@@ -108,7 +120,7 @@ export default function App () {
           About
         </Button>
       </header>
-      <Modal show={show} onHide={handleClose} centered size="lg">
+      <Modal show={show} onHide={handleClose} centered size='lg'>
         <Modal.Header closeButton>
           <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
@@ -168,93 +180,106 @@ export default function App () {
           <br></br>
         </div>
       </header>
-      <div>
-        <br></br>
-        {midiFile && (
-          <div style={{ marginBottom: '3vh' }}>
-            <MidiPlayer data={midiFile}></MidiPlayer>
+      <br></br>
+      {midiFile && (
+        <div style={{ marginBottom: '3vh' }}>
+          <MidiPlayer data={midiFile}></MidiPlayer>
+        </div>
+      )}
+      {view1 && (
+        <>
+          <h2>Tab 1</h2>
+          <br></br>
+          <OverlayTrigger
+            placement={'left'}
+            overlay={
+              <Popover>
+                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                <Popover.Body>
+                  This number represents the total cost of the fingering
+                  sequence for the current tab. The higher the cost, the harder
+                  the tab is to play.
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
+              cost: {cost1}
+            </Button>
+          </OverlayTrigger>
+          <div>
+            <Button variant='primary' onClick={() => downloadTxtFile(tab1)}style={{ marginBottom: '5vh' }}>
+              download tab
+            </Button>
           </div>
-        )}
-        {view1 && (
-          <>
-            <h2>Tab 1</h2>
-            <br></br>
-            <OverlayTrigger
-              placement={'left'}
-              overlay={
-                <Popover>
-                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                  <Popover.Body>
-                    This number represents the total cost of the fingering
-                    sequence for the current tab. The higher the cost, the
-                    harder the tab is to play.
-                  </Popover.Body>
-                </Popover>
-              }
-            >
-              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
-                cost: {cost1}
-              </Button>
-            </OverlayTrigger>
-            <div id='container'>
-              <p className='tab'>{tab1.map(x => x + '\n')}</p>
-            </div>
-          </>
-        )}
-        {view2 && (
-          <>
-            <h2>Tab 2</h2>
-            <br></br>
-            <OverlayTrigger
-              placement={'left'}
-              overlay={
-                <Popover>
-                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                  <Popover.Body>
-                    This number represents the total cost of the fingering
-                    sequence for the current tab. The higher the cost, the
-                    harder the tab is to play.
-                  </Popover.Body>
-                </Popover>
-              }
-            >
-              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
-                cost: {cost2}
-              </Button>
-            </OverlayTrigger>
-            <div id='container'>
-              <p className='tab'>{tab2.map(x => x + '\n')}</p>
-            </div>
-          </>
-        )}
+          <div id='container'>
+            <p className='tab'>{tab1.map(x => x + '\n')}</p>
+          </div>
+        </>
+      )}
+      {view2 && (
+        <>
+          <h2>Tab 2</h2>
+          <br></br>
+          <OverlayTrigger
+            placement={'left'}
+            overlay={
+              <Popover>
+                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                <Popover.Body>
+                  This number represents the total cost of the fingering
+                  sequence for the current tab. The higher the cost, the harder
+                  the tab is to play.
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
+              cost: {cost2}
+            </Button>
+          </OverlayTrigger>
+          <div>
+            <Button variant='primary' onClick={() => downloadTxtFile(tab2)}style={{ marginBottom: '5vh' }}>
+              download tab
+            </Button>
+          </div>
+          <div id='container'>
+            <p className='tab'>{tab2.map(x => x + '\n')}</p>
+          </div>
+        </>
+      )}
 
-        {view3 && (
-          <>
-            <h2>Tab 3</h2>
-            <br></br>
-            <OverlayTrigger
-              placement={'left'}
-              overlay={
-                <Popover>
-                  <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                  <Popover.Body>
-                    This number represents the total cost of the fingering
-                    sequence for the current tab. The higher the cost, the
-                    harder the tab is to play.
-                  </Popover.Body>
-                </Popover>
-              }
-            >
-              <Button variant='secondary' style={{ marginBottom: '5vh' }}>
-                cost: {cost3}
-              </Button>
-            </OverlayTrigger>
-            <div id='container'>
-              <p className='tab'>{tab3.map(x => x + '\n')}</p>
-            </div>
-          </>
-        )}
-      </div>
+      {view3 && (
+        <>
+          <h2>Tab 3</h2>
+          <br></br>
+          <OverlayTrigger
+            placement={'left'}
+            overlay={
+              <Popover>
+                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
+                <Popover.Body>
+                  This number represents the total cost of the fingering
+                  sequence for the current tab. The higher the cost, the harder
+                  the tab is to play.
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
+              cost: {cost3}
+            </Button>
+          </OverlayTrigger>
+          <div>
+            <Button variant='primary' onClick={() => downloadTxtFile(tab3)}style={{ marginBottom: '5vh' }}>
+              download tab
+            </Button>
+          </div>
+          <div id='container'>
+            <p className='tab'>{tab3.map(x => x + '\n')}</p>
+          </div>
+        </>
+      )}
     </div>
   )
 }
