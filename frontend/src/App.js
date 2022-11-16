@@ -32,17 +32,20 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
-  const [filename, setFilename] = useState("")
+  const [filename, setFilename] = useState('')
   const [midiFile, setFile] = useState(null)
   //const url = 'http://127.0.0.1/tablator'
   const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
-  const downloadTxtFile = (tab) => {
+  const downloadTxtFile = tab => {
     const element = document.createElement('a')
-    const file = new Blob(tab.map(x => x + '\n'), {
-      type: 'text/plain'
-    })
+    const file = new Blob(
+      tab.map(x => x + '\n'),
+      {
+        type: 'text/plain'
+      }
+    )
     element.href = URL.createObjectURL(file)
     element.download = filename + '.txt'
     document.body.appendChild(element) // Required for this to work in FireFox
@@ -50,7 +53,7 @@ export default function App () {
   }
   const uploadFile = async e => {
     const file = e.target.files[0]
-    setFilename(e.target.files[0].name.replace(/\.[^/.]+$/, ""))
+    setFilename(e.target.files[0].name.replace(/\.[^/.]+$/, ''))
     fileToArrayBuffer(file).then(data => {
       console.log(data)
       setFile(data)
@@ -125,10 +128,10 @@ export default function App () {
           <Modal.Title>About this project</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          For any note within the range of the guitar, a guitarist must choose
-          which finger to use to fret the string and/or which string to play the
-          note on. This choice greatly impacts the playability of the passage:
-          an easier fingering means an easier time playing. This program uses a
+          When playing a passage, for every note, a guitarist must choose which
+          finger to use to fret the string and/or which string to play the note
+          on. This choice greatly impacts the playability of the passage: an
+          better fingering means an easier time playing. This program uses a
           dynamic programming algorithm to find the three best possible
           fingering sequences for a sequence of notes. To start, just upload a
           midi file!
@@ -208,7 +211,11 @@ export default function App () {
             </Button>
           </OverlayTrigger>
           <div>
-            <Button variant='primary' onClick={() => downloadTxtFile(tab1)}style={{ marginBottom: '5vh' }}>
+            <Button
+              variant='primary'
+              onClick={() => downloadTxtFile(tab1)}
+              style={{ marginBottom: '5vh' }}
+            >
               download tab
             </Button>
           </div>
@@ -239,7 +246,11 @@ export default function App () {
             </Button>
           </OverlayTrigger>
           <div>
-            <Button variant='primary' onClick={() => downloadTxtFile(tab2)}style={{ marginBottom: '5vh' }}>
+            <Button
+              variant='primary'
+              onClick={() => downloadTxtFile(tab2)}
+              style={{ marginBottom: '5vh' }}
+            >
               download tab
             </Button>
           </div>
@@ -271,7 +282,11 @@ export default function App () {
             </Button>
           </OverlayTrigger>
           <div>
-            <Button variant='primary' onClick={() => downloadTxtFile(tab3)}style={{ marginBottom: '5vh' }}>
+            <Button
+              variant='primary'
+              onClick={() => downloadTxtFile(tab3)}
+              style={{ marginBottom: '5vh' }}
+            >
               download tab
             </Button>
           </div>

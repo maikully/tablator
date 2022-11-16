@@ -2,7 +2,7 @@
 
 Webapp that converts a midi file into a guitar tab.
 
-For any note within the range of the guitar, a guitarist must choose which finger to use to fret the string and/or which string to play the note on. This choice greatly impacts the playability of the passage: an better fingering means an easier time playing. This program uses a dynamic programming algorithm to find the three best possible fingering sequences for a sequence of notes. 
+When playing a passage, for every note, a guitarist must choose which finger to use to fret the string and/or which string to play the note on. This choice greatly impacts the playability of the passage: an better fingering means an easier time playing. This program uses a dynamic programming algorithm to find the three best possible fingering sequences for a sequence of notes. 
 
 Frontend served at http://tablator.herokuapp.com
 
