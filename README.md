@@ -16,6 +16,7 @@ Todo:
 - [ ] get chords working
 - [ ] double-digit frets being cut in half at wrap
 - [ ] display note fingerings alongside note
+- [ ] add sample midi
 - [x] download buttons for tabs
 - [x] display cost for tab
 - [x] notes after a long pause being cut off
