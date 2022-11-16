@@ -17,6 +17,7 @@ Todo:
 - [ ] get chords working
 - [ ] display note fingerings alongside note
 - [ ] add option to not prioritize open strings or lower frets  
+- [x] add loading throbber
 - [x] double-digit frets being cut in half at wrap
 - [x] add sample midi
 - [x] download buttons for tabs

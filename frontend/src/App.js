@@ -171,7 +171,7 @@ export default function App () {
         </Form.Group>
         {!midiFile && (
           <a href='sample_monophonic_pentatonic.mid'>
-            <Button variant='primary'>download sample midi file</Button>{' '}
+            <Button variant='primary'>download sample midi</Button>{' '}
           </a>
         )}
         {load && (
