@@ -160,10 +160,10 @@ export default function App () {
         </Form.Group>
         {!midiFile && (
           <a href='sample_monophonic_pentatonic.mid'>
-            <Button variant='primary'>download sample midi file</Button>
+            <Button variant='primary'>download sample midi file</Button>{' '}
           </a>
         )}
-        <div style={{ marginBottom: '2vh' }}>
+        <div>
           {tab1.length > 0 && (
             <>
               <Button onClick={() => handleChange(1)} variant='primary'>
@@ -185,8 +185,8 @@ export default function App () {
               </Button>{' '}
             </>
           )}
-          <br></br>
         </div>
+        <br></br>
       </header>
       <br></br>
       {midiFile && (
