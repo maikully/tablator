@@ -158,6 +158,11 @@ export default function App () {
           </Form.Label>
           <Form.Control type='file' />
         </Form.Group>
+        {!midiFile && (
+          <a href='sample_monophonic_pentatonic.mid'>
+            <Button variant='primary'>download sample midi file</Button>
+          </a>
+        )}
         <div style={{ marginBottom: '2vh' }}>
           {tab1.length > 0 && (
             <>
