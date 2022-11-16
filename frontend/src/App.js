@@ -8,6 +8,8 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
 import $ from 'jquery'
 import Popover from 'react-bootstrap/Popover'
+import TabDisplay from './TabDisplay'
+import Spinner from 'react-bootstrap/Spinner'
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
@@ -34,6 +36,7 @@ export default function App () {
   const [view3, setView3] = useState(false)
   const [filename, setFilename] = useState('')
   const [midiFile, setFile] = useState(null)
+  const [load, setLoading] = useState(false)
   //const url = 'http://127.0.0.1/tablator'
   const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
@@ -66,23 +69,31 @@ export default function App () {
       data.append('file', file)
       data.append('width', width)
       console.log(width)
+      setLoading(true)
       let response = await fetch(url, {
         method: 'post',
         body: data
       })
       let res = await response.json()
       console.log(res.costs[2])
+      setLoading(false)
       if (res.data[0]) {
         setTab1(res.data[0])
         setCost1(truncateDecimals(res.costs[0], 2))
+      } else {
+        setTab1([])
       }
       if (res.data[1]) {
         setTab2(res.data[1])
         setCost2(truncateDecimals(res.costs[1], 2))
+      } else {
+        setTab2([])
       }
       if (res.data[2]) {
         setTab3(res.data[2])
         setCost3(truncateDecimals(res.costs[2], 2))
+      } else {
+        setTab3([])
       }
     }
   }
@@ -163,22 +174,27 @@ export default function App () {
             <Button variant='primary'>download sample midi file</Button>{' '}
           </a>
         )}
+        {load && (
+    <>
+      <Spinner animation="border" variant="primary" />
+    </>
+        )}
         <div>
-          {tab1.length > 0 && (
+          {tab1.length > 0 && !load && (
             <>
               <Button onClick={() => handleChange(1)} variant='primary'>
                 View tab 1
               </Button>{' '}
             </>
           )}
-          {tab2.length > 0 && (
+          {tab2.length > 0 && !load && (
             <>
               <Button onClick={() => handleChange(2)} variant='primary'>
                 View tab 2
               </Button>{' '}
             </>
           )}
-          {tab3.length > 0 && (
+          {tab3.length > 0 && !load && (
             <>
               <Button onClick={() => handleChange(3)} variant='primary'>
                 View tab 3
@@ -195,110 +211,13 @@ export default function App () {
         </div>
       )}
       {view1 && (
-        <>
-          <h2>Tab 1</h2>
-          <br></br>
-          <OverlayTrigger
-            placement={'left'}
-            overlay={
-              <Popover>
-                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                <Popover.Body>
-                  This number represents the total cost of the fingering
-                  sequence for the current tab. The higher the cost, the harder
-                  the tab is to play.
-                </Popover.Body>
-              </Popover>
-            }
-          >
-            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
-              cost: {cost1}
-            </Button>
-          </OverlayTrigger>
-          <div>
-            <Button
-              variant='primary'
-              onClick={() => downloadTxtFile(tab1)}
-              style={{ marginBottom: '5vh' }}
-            >
-              download tab
-            </Button>
-          </div>
-          <div id='container'>
-            <p className='tab'>{tab1.map(x => x + '\n')}</p>
-          </div>
-        </>
+        <TabDisplay cost={cost1} tab={tab1} filename={filename} num={1} />
       )}
       {view2 && (
-        <>
-          <h2>Tab 2</h2>
-          <br></br>
-          <OverlayTrigger
-            placement={'left'}
-            overlay={
-              <Popover>
-                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                <Popover.Body>
-                  This number represents the total cost of the fingering
-                  sequence for the current tab. The higher the cost, the harder
-                  the tab is to play.
-                </Popover.Body>
-              </Popover>
-            }
-          >
-            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
-              cost: {cost2}
-            </Button>
-          </OverlayTrigger>
-          <div>
-            <Button
-              variant='primary'
-              onClick={() => downloadTxtFile(tab2)}
-              style={{ marginBottom: '5vh' }}
-            >
-              download tab
-            </Button>
-          </div>
-          <div id='container'>
-            <p className='tab'>{tab2.map(x => x + '\n')}</p>
-          </div>
-        </>
+        <TabDisplay cost={cost2} tab={tab2} filename={filename} num={2} />
       )}
-
       {view3 && (
-        <>
-          <h2>Tab 3</h2>
-          <br></br>
-          <OverlayTrigger
-            placement={'left'}
-            overlay={
-              <Popover>
-                <Popover.Header as='h3'>{'What is Cost?'}</Popover.Header>
-                <Popover.Body>
-                  This number represents the total cost of the fingering
-                  sequence for the current tab. The higher the cost, the harder
-                  the tab is to play.
-                </Popover.Body>
-              </Popover>
-            }
-          >
-            <Button variant='secondary' style={{ marginBottom: '2vh' }}>
-              cost: {cost3}
-            </Button>
-          </OverlayTrigger>
-          <div>
-            <Button
-              variant='primary'
-              onClick={() => downloadTxtFile(tab3)}
-              style={{ marginBottom: '5vh' }}
-            >
-              download tab
-            </Button>
-          </div>
-          <div id='container'>
-            <p className='tab'>{tab3.map(x => x + '\n')}</p>
-          </div>
-        </>
+        <TabDisplay cost={cost3} tab={tab3} filename={filename} num={3} />
       )}
     </div>
   )
