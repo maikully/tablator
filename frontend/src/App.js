@@ -4,7 +4,7 @@ import './App.css'
 import { useFilePicker } from 'use-file-picker'
 import { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
-import MidiPlayer from 'react-midi-player';
+import MidiPlayer from 'react-midi-player'
 
 export default function App () {
   const [openFileSelector, { filesContent, loading }] = useFilePicker({
@@ -16,12 +16,19 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
+  const [midiFile, setFile] = useState(null)
   //const url = 'http://127.0.0.1/tablator'
   const url = 'https://tablator.herokuapp.com/tablator'
   // the react post request sender
+  const fileToArrayBuffer = require('file-to-array-buffer')
   const uploadFile = async e => {
     const file = e.target.files[0]
-    console.log(file)
+    fileToArrayBuffer(file).then(data => {
+      console.log(data)
+      setFile(data)
+      //=> ArrayBuffer {byteLength: ...}
+    })
+
     if (file != null) {
       const data = new FormData()
       data.append('file', file)
@@ -68,13 +75,14 @@ export default function App () {
         <br></br>
         <h1>tablator</h1>
         <br></br>
-      <Form.Group  onChange={uploadFile} controlId="formFile" className="mb-3">
-        <Form.Label>
-        <p style={{fontSize:"medium"}}>choose a .mid or .midi file</p></Form.Label>
-        <Form.Control type="file" />
-      </Form.Group>
+        <Form.Group onChange={uploadFile} controlId='formFile' className='mb-3'>
+          <Form.Label>
+            <p style={{ fontSize: 'medium' }}>choose a .mid or .midi file</p>
+          </Form.Label>
+          <Form.Control type='file' />
+        </Form.Group>
         {tab1.length > 0 && (
-          <div style={{marginBottom: "5vh"}}>
+          <div style={{ marginBottom: '2vh' }}>
             <Button onClick={() => handleChange(1)} variant='primary'>
               View tab 1
             </Button>{' '}
@@ -84,7 +92,14 @@ export default function App () {
             <Button onClick={() => handleChange(3)} variant='primary'>
               View tab 3
             </Button>{' '}
+            <br></br>
           </div>
+        )}
+        {midiFile && (
+          <MidiPlayer
+            style={{ marginTop: '20px', marginBototm:"10vh" }}
+            data={midiFile}
+          ></MidiPlayer>
         )}
       </header>
       <div>
