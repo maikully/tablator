@@ -181,7 +181,7 @@ export default function App () {
           </Alert>
         )}
         {!midiFile && (
-          <a target="_blank" href='sample_monophonic_pentatonic.mid'>
+          <a target="_blank" href='sample_monophonic_pentatonic.mid' download>
             <Button variant='primary'>download sample midi</Button>{' '}
           </a>
         )}
