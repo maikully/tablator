@@ -9,7 +9,8 @@ When playing a passage, for every note, a guitarist must choose which finger to 
 
 The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret).
 
-Right now, only monophonic midi parts should be used for this program. For polyphonic beats (when two notes have the exact same note-on time), only one of the notes will be used.
+
+Currently, the program will only work on monophonic midi files. For any polyphonic parts (if two consecutive notes have the exact same note-on time), the program only uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
 
 ## Features
 
@@ -41,6 +42,8 @@ python3 base.py
 - [ ] get chords working
 - [ ] display note fingerings alongside note
 - [ ] add option to not prioritize open strings or lower frets  
+- [ ] add custom tunings
+- [x] add bass tabs
 - [x] add loading throbber
 - [x] double-digit frets being cut in half at wrap
 - [x] add sample midi
