@@ -20,25 +20,37 @@ def measure_similarity(path1, path2):
 """
 compute cost of transition between two positions
 """
-def compute_cost(position1, position2, opensetting):
+def compute_cost(position1, position2, settings):
     # cost for note itself (open string favored)
     string1, fret1, finger1 = position1
     string2, fret2, finger2 = position2
+    opensetting,highersetting = settings
     # prioritize open strings
     if opensetting == 1:
         if int(fret1) == 0 or int(fret2) == 0:
             return 0
-    factor = 1
+    openfactor = 1
     # avoid open strings
     if opensetting == 2:
         if int(fret1) == 0 or int(fret2) == 0:
             return 8
+    # ignore cost of higher frets
+    if highersetting == 1:
+        cost1 = 0
+        print("asdasd")
+    # prioritize higher frets
+    elif highersetting == 2:
+        cost1 = -np.sqrt(fret1 + fret2) * .1
+    else:
+        # weigh the fret values themselves
+        cost1 = np.sqrt(fret1 + fret2) * .1
+
+    print(highersetting)
+    print(cost1)
     expected_fret = fret1 + (finger2 - finger1)
 
-    # weigh the fret values themselves
-    cost1 = np.sqrt(fret1 + fret2) * .1
     
-    return (fret2 - expected_fret)**2 * factor + cost1
+    return (fret2 - expected_fret)**2 * openfactor + cost1
 
 """
 convert list of costs to difficulty values
@@ -169,7 +181,7 @@ def extract_notes(file, starts, total_range):
 """
 find the costs and paths in the sequence
 """
-def get_paths(sequence, opensetting):
+def get_paths(sequence, settings):
     final_paths = defaultdict(dict)
     # set one-note paths to zero cost
     final_paths[0] = dict(zip(sequence[0], [(0, [seq])
@@ -178,11 +190,10 @@ def get_paths(sequence, opensetting):
     for i, possible_positions in enumerate(sequence[1:]):
         # checking every possible position
         for position in possible_positions:
-            print(position)
             min = sys.maxsize
             # checking every position for the previous note
             for prev_position, (prev_cost, prev_sequence) in final_paths[i].items():
-                curr_cost = prev_cost + compute_cost(prev_position, position, opensetting)
+                curr_cost = prev_cost + compute_cost(prev_position, position, settings)
                 if curr_cost < min:
                     min, path = curr_cost, prev_sequence + [position]
             final_paths[i+1][position] = (min, path)

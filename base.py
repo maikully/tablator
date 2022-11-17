@@ -38,6 +38,9 @@ def process_file():
     ranges = None
     strings = None
     instrument = request.form["instrument"]
+    opensetting = int(request.form["opensetting"])
+    highersetting = int(request.form["higher"])
+    settings = (opensetting, highersetting)
     if instrument == "guitar":
         starts = STARTS_GUITAR
         ranges = RANGES_GUITAR
@@ -64,11 +67,10 @@ def process_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], "temp.mid"))
 
-    opensetting = int(request.form["opensetting"])
     file = MidiFile(UPLOAD_FOLDER + "/" + "temp.mid", clip=True)
     notes = extract_notes(file, starts, total_range)
     sequence = generate_fingerings(notes, starts, ranges)
-    final_paths = get_paths(sequence, opensetting)
+    final_paths = get_paths(sequence, settings)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
     # take top three paths
     counter = 0

@@ -70,7 +70,6 @@ export default function App () {
       default:
         break
     }
-    console.log(firstNote.toString() + lastNote.toString())
     setRadioValue(x)
     if (x === 2) setCustom(true)
     else setCustom(false)
@@ -119,9 +118,7 @@ export default function App () {
   const [load, setLoading] = useState(false)
   const [alert, setAlert] = useState(false)
   const [input, setInput] = useState('')
-  useEffect(() => {
-    console.log('asdasds')
-  }, [midiFile])
+  const [higher, setHigher] = useState(0)
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const downloadTxtFile = tab => {
@@ -194,6 +191,7 @@ export default function App () {
         data.append('width', width)
         data.append('instrument', instrument)
         data.append('opensetting', open)
+        data.append('higher', higher)
         setLoading(true)
         let response = await fetch(url, {
           method: 'post',
@@ -201,7 +199,6 @@ export default function App () {
         })
         let res = await response.json()
         setLoading(false)
-        console.log(res.data)
         if (res.data[0]) {
           setTab1(res.data[0])
           setCost1(truncateDecimals(res.costs[0], 2))
@@ -263,7 +260,6 @@ export default function App () {
 
     // Add notes
     data.map(note => {
-      console.log(note)
       const n = new MidiWriter.NoteEvent({
         pitch: note,
         duration: '8'
@@ -273,7 +269,6 @@ export default function App () {
 
     // Generate a data URI
     const write = new MidiWriter.Writer(track)
-    console.log(write.dataUri())
     setFile(write.dataUri().replace(/^data:audio\/midi;base64,/, ''))
     fileToArrayBuffer(dataURItoBlob(write.dataUri())).then(data => {
       setFile(data)
@@ -302,6 +297,7 @@ export default function App () {
       data.append('width', width)
       data.append('instrument', instrument)
       data.append('opensetting', open)
+      data.append('higher', higher)
       setLoading(true)
       let response = await fetch(url, {
         method: 'post',
@@ -309,7 +305,6 @@ export default function App () {
       })
       let res = await response.json()
       setLoading(false)
-      console.log(res.data)
       if (res.data[0]) {
         setTab1(res.data[0])
         setCost1(truncateDecimals(res.costs[0], 2))
@@ -544,7 +539,6 @@ export default function App () {
                       sharps: sharps
                     })
                     setInput(input + ' ' + noteName)
-                    console.log(noteName)
                   }}
                   stopNote={midiNumber => {
                     //console.log(note(midiNumber))
@@ -675,6 +669,18 @@ export default function App () {
               <ToggleButton
                 type='radio'
                 variant='secondary'
+                name='buttonavoid'
+                key={'buttonavoid'}
+                id={'buttonavoid'}
+                value={'buttonavoid'}
+                checked={open === 2}
+                onChange={() => setOpen(2)}
+              >
+                avoid open strings
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
                 name='buttonprioritize'
                 key={'buttonprioritize'}
                 id={'buttonprioritize'}
@@ -684,17 +690,43 @@ export default function App () {
               >
                 prioritize open strings
               </ToggleButton>
+            </ButtonGroup>
+            <ButtonGroup className='mb-2'>
               <ToggleButton
                 type='radio'
                 variant='secondary'
-                name='buttonavoid'
-                key={'buttonavoid'}
-                id={'buttonavoid'}
-                value={'buttonavoid'}
-                checked={open === 2}
-                onChange={() => setOpen(2)}
+                name='defaulthigher'
+                key={'defaulthigher'}
+                id={'defaulthigher'}
+                value={'defaulthigher'}
+                checked={higher === 0}
+                onChange={() => setHigher(0)}
               >
-                avoid open strings
+                default
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='ignorehigher'
+                key={'ignorehigher'}
+                id={'ignorehigher'}
+                value={'ignorehigher'}
+                checked={higher === 1}
+                onChange={() => setHigher(1)}
+              >
+                ignore cost of higher frets
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='prioritizehigher'
+                key={'prioritizehigher'}
+                id={'prioritizehigher'}
+                value={'prioritizehigher'}
+                checked={higher === 2}
+                onChange={() => setHigher(2)}
+              >
+                prioritize higher frets
               </ToggleButton>
             </ButtonGroup>
             {menu === 2 && (
