@@ -96,6 +96,7 @@ export default function App () {
   const mapAccidental = new Map()
   mapAccidental.set(0, 'sharps')
   mapAccidental.set(1, 'flats')
+  const [alertmessage, setAlertmessage] = useState("")
   const [accidentals, setAccidentals] = useState(0)
   const [menu, setMenu] = useState(0)
   const [show, setShow] = useState(false)
@@ -144,6 +145,7 @@ export default function App () {
       .toLowerCase()
       .trim()
     if (extension !== 'mid' && extension !== 'midi') {
+      setAlertmessage("file type not mid or midi!")
       setAlert(true)
     } else {
       setAlert(false)
@@ -162,6 +164,7 @@ export default function App () {
       .toLowerCase()
       .trim()
     if (extension !== 'mid' && extension !== 'midi') {
+      setAlertmessage("file type not mid or midi!")
       setAlert(true)
     } else {
       setAlert(false)
@@ -248,7 +251,13 @@ export default function App () {
   }
   const uploadNotesData = async e => {
     var data = input.trim().split(' ')
-
+    if (data.length === 1) {
+      setAlertmessage("input must contain at least 2 notes!")
+      setAlert(true)
+      return
+    } else{
+      setAlert(false)
+    }
     const track = new MidiWriter.Track()
     track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: 1 }))
 
@@ -733,7 +742,7 @@ export default function App () {
             key={'warning'}
             variant={'warning'}
           >
-            File extension not .mid or .midi!
+            {alertmessage}
           </Alert>
         )}
         {load && <Spinner animation='border' variant='primary' />}
