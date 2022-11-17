@@ -45,6 +45,8 @@ python3 base.py
 - [ ] add custom tunings
 - [ ] display as score using Lilypond
 - [ ] option to download composed midi
+- [ ] option to octave shift
+- [ ] fix negative difficulty values when prioritizing higher
 - [x] option to ignore fret height
 - [x] piano input
 - [x] leave out similar tabs
