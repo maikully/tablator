@@ -41,7 +41,9 @@ h1 {
   font-size: large;
   line-height: 18px;
 }
-
+.title:hover {
+  cursor:pointer;
+}
 .App-header {
   background-color: #282c34;
   display: flex;

@@ -1,20 +1,20 @@
 # Tablator
 
 
-Tablator is a webapp that converts a midi file into a guitar tab.
+Tablator is a webapp that converts a sequence of notes or midi file into a guitar tab.
 
 App link: http://tablator.herokuapp.com
 
 When playing a passage, for every note, a guitarist must choose which finger to use to fret the string and, unless the note only can be played on one string, which string to play the note on. This choice greatly impacts the playability of the passage: a better fingering means an easier time playing.  This program uses a dynamic programming algorithm to find the three best possible fingering sequences for a sequence of notes. 
 
-The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret).
+The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Higher frets also produce higher cost.
 
-
-Currently, the program will only work on monophonic midi files. For any polyphonic parts (if two consecutive notes have the exact same note-on time), the program only uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
+Currently, the program will only work on monophonic data. For any polyphonic parts (if two consecutive notes have the exact same note-on time), the program only uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
 
 ## Features
 
-- import a midi file to view up to three of its best tabs
+- compose a line using a virtual keyboard and view up to three of its best tabs
+- import a midi file and view up to three of its best tabs
 - play the midi file out loud
 - download the tab as a txt file
 
@@ -44,6 +44,7 @@ python3 base.py
 - [ ] add option to not prioritize open strings or lower frets  
 - [ ] add custom tunings
 - [ ] display as score using Lilypond
+- [x] piano input
 - [x] leave out similar tabs
 - [x] add bass tabs
 - [x] add loading throbber

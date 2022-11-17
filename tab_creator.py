@@ -38,7 +38,7 @@ def compute_cost(position1, position2, opensetting):
     # weigh the fret values themselves
     cost1 = np.sqrt(fret1 + fret2) * .1
     
-    return (fret2 - expected_fret)**2 * factor
+    return (fret2 - expected_fret)**2 * factor + cost1
 
 """
 convert list of costs to difficulty values

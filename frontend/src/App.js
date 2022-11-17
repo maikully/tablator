@@ -1,8 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useFilePicker } from 'use-file-picker'
-import { useState } from 'react'
-import { Button, ToggleButton, Form, Modal } from 'react-bootstrap'
+import { useState, useEffect } from 'react'
+import { Button, ToggleButton, Form, Modal, Fade } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
 import $ from 'jquery'
@@ -11,8 +11,9 @@ import Spinner from 'react-bootstrap/Spinner'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import { BsDownload } from 'react-icons/bs'
 import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano'
-import { midiNumToNote } from './funs'
+import { Interval, Note, Scale, Midi } from '@tonaljs/tonal'
 import 'react-piano/dist/styles.css'
+import FadeIn from 'react-fade-in'
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
@@ -26,6 +27,7 @@ export default function App () {
   }
   const [firstNote, setFirstNote] = useState(40)
   const [lastNote, setLastNote] = useState(88)
+  const MidiWriter = require('midi-writer-js')
   const keyboardShortcuts = KeyboardShortcuts.create({
     firstNote: firstNote,
     lastNote: lastNote,
@@ -84,11 +86,17 @@ export default function App () {
     setFile(null)
     setOpen(0)
     setRadio(0)
+    setAlert(false)
+    setInput('')
   }
   const map1 = new Map()
   map1.set(0, 'guitar')
   map1.set(1, 'bass')
   map1.set(2, 'custom')
+  const mapAccidental = new Map()
+  mapAccidental.set(0, 'sharps')
+  mapAccidental.set(1, 'flats')
+  const [accidentals, setAccidentals] = useState(0)
   const [menu, setMenu] = useState(0)
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
@@ -105,10 +113,14 @@ export default function App () {
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
   const [filename, setFilename] = useState('')
+  const [midiTarget, setMidiTarget] = useState(null)
   const [midiFile, setFile] = useState(null)
   const [load, setLoading] = useState(false)
   const [alert, setAlert] = useState(false)
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState('')
+  useEffect(() => {
+    console.log('asdasds')
+  }, [midiFile])
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const downloadTxtFile = tab => {
@@ -124,9 +136,27 @@ export default function App () {
     document.body.appendChild(element) // Required for this to work in FireFox
     element.click()
   }
-  const uploadFile = async e => {
+  const setMidi = e => {
     const file = e.target.files[0]
     const extension = e.target.files[0].name
+      .split('.')
+      .pop()
+      .toLowerCase()
+      .trim()
+    if (extension !== 'mid' && extension !== 'midi') {
+      setAlert(true)
+    } else {
+      setAlert(false)
+      setMidiTarget(file)
+      fileToArrayBuffer(file).then(data => {
+        setFile(data)
+      })
+      console.log(midiFile)
+    }
+  }
+  const uploadFile = async e => {
+    const file = midiTarget
+    const extension = file.name
       .split('.')
       .pop()
       .toLowerCase()
@@ -139,7 +169,7 @@ export default function App () {
         setFile(data)
         //=> ArrayBuffer {byteLength: ...}
       })
-      if (file != null) {
+      if (file !== null) {
         var instrument = ''
         switch (radioValue) {
           case 0:
@@ -190,13 +220,114 @@ export default function App () {
       }
     }
   }
+  function dataURItoBlob (dataURI) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURI.split(',')[1])
 
+    // separate out the mime component
+    var mimeString = dataURI
+      .split(',')[0]
+      .split(':')[1]
+      .split(';')[0]
+
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length)
+
+    // create a view into the buffer
+    var ia = new Uint8Array(ab)
+
+    // set the bytes of the buffer to the correct values
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i)
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    var blob = new Blob([ab], { type: mimeString })
+    return blob
+  }
+  const uploadNotesData = async e => {
+    var data = input.trim().split(' ')
+
+    const track = new MidiWriter.Track()
+    track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: 1 }))
+
+    // Add notes
+    data.map(note => {
+      console.log(note)
+      const n = new MidiWriter.NoteEvent({
+        pitch: note,
+        duration: '8'
+      })
+      track.addEvent(n)
+    })
+
+    // Generate a data URI
+    const write = new MidiWriter.Writer(track)
+    console.log(write.dataUri())
+    setFile(write.dataUri().replace(/^data:audio\/midi;base64,/, ''))
+    fileToArrayBuffer(dataURItoBlob(write.dataUri())).then(data => {
+      setFile(data)
+      //=> ArrayBuffer {byteLength: ...}
+    })
+    var file = dataURItoBlob(write.dataUri())
+    if (file !== null) {
+      var instrument = ''
+      switch (radioValue) {
+        case 0:
+          instrument = 'guitar'
+          break
+        case 1:
+          instrument = 'bass'
+          break
+        case 2:
+          instrument = 'custom'
+          break
+        default:
+          instrument = ''
+          break
+      }
+      const data = new FormData()
+      const width = $(window).width()
+      data.append('file', file)
+      data.append('width', width)
+      data.append('instrument', instrument)
+      data.append('opensetting', open)
+      setLoading(true)
+      let response = await fetch(url, {
+        method: 'post',
+        body: data
+      })
+      let res = await response.json()
+      setLoading(false)
+      console.log(res.data)
+      if (res.data[0]) {
+        setTab1(res.data[0])
+        setCost1(truncateDecimals(res.costs[0], 2))
+      } else {
+        setTab1([])
+      }
+      if (res.data[1]) {
+        setTab2(res.data[1])
+        setCost2(truncateDecimals(res.costs[1], 2))
+      } else {
+        setTab2([])
+      }
+      if (res.data[2]) {
+        setTab3(res.data[2])
+        setCost3(truncateDecimals(res.costs[2], 2))
+      } else {
+        setTab3([])
+      }
+    }
+  }
   return (
     <div className='App'>
       <header className='Upper-header'>
         <Button
           variant='secondary'
           onClick={handleShow}
+          size="sm"
           style={{ marginTop: '2vh', marginRight: '2vw' }}
         >
           About
@@ -213,11 +344,11 @@ export default function App () {
           greatly impacts the playability of the passage: a better fingering
           means an easier time playing. This program uses a dynamic programming
           algorithm to find the three best possible fingering sequences for a
-          sequence of notes. To start, choose an instrument in the settings and
-          upload a midi file!
+          sequence of notes. 
+          To start, type in the notes with the virtual keyboard or upload a midi file!
           <br></br>
           <br></br>
-          Currently, the program will only work on monophonic midi files. For
+          Currently, the program will only work on monophonic parts. For
           any polyphonic parts (if two consecutive notes have the exact same
           note-on time), the program only uses one of the notes. Any notes
           outside the range of the chosen instrument will be octave-shifted in.
@@ -236,111 +367,186 @@ export default function App () {
         </Modal.Footer>
       </Modal>
       <header className='App-header'>
-        <h1>tablator</h1>
-        {menu == 0 && (
-          <>
+        <h1 className="title" onClick={goBack}>tablator</h1>
+        {menu === 0 && (
+          <FadeIn>
             <br></br>
             <Button
-              variant='primary'
-              onClick={() => setMenu(1)}
-              style={{ width: '15%' }}
-            >
-              Create tab from midi file
-            </Button>
-            <br></br>
-            <Button
-            disabled
               variant='primary'
               onClick={() => setMenu(2)}
-              style={{ width: '15%' }}
+              style={{ width: '300px' }}
             >
               Create tab from note sequence
             </Button>
-          </>
-        )}
-        {menu == 1 && (
-          <Form>
-            <Form.Group
-              onChange={uploadFile}
-              controlId='formFile'
-              className='mb-3'
+            <br></br> 
+            <Button
+              variant='primary'
+              onClick={() => setMenu(1)}
+              style={{ width: '300px' }}
             >
-              <Form.Label>
-                <p style={{ fontSize: 'medium' }}>
-                  choose an instrument and upload a midi file to generate its
-                  best possible tabs!
-                </p>
-              </Form.Label>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 'auto'
-                }}
-              >
-                <Form.Control type='file' />{' '}
-                <Button
-                  variant='secondary'
-                  onClick={() => handleSettingsShow(true)}
-                >
-                  Settings
-                </Button>
-              </div>
-              <p style={{ marginTop: '1vh', fontSize: 'large' }}>
-                current instrument: {map1.get(radioValue)}
-              </p>
-            </Form.Group>
-          </Form>
-        )}
-        {menu == 1 && !midiFile && (
-          <a target='_blank' href='sample_monophonic_pentatonic.mid' download>
-            <Button variant='primary'>
-              <BsDownload></BsDownload> sample midi
+              Create tab from midi file
             </Button>
-          </a>
+          </FadeIn>
         )}
-        {menu == 2 && (
-          <Form>
-            <Form.Group
-              onChange={uploadFile}
-              controlId='formFile'
-              className='mb-3'
-            >
-              <Form.Label>
-                <p style={{ fontSize: 'medium' }}>
-                  type in a series of notes to generate its best possible tabs!
-                </p>
-              </Form.Label>
-              <div>
-                <Form.Control as='textarea' rows={3} value={input} onChange={(e) => setInput(e.target.value)} />
-                <Button
-                  variant='secondary'
-                  onClick={() => handleSettingsShow(true)}
+        {menu === 1 && (
+          <FadeIn>
+            <Form>
+              <Form.Group controlId='formFile' className='mb-3'>
+                <Form.Label>
+                  <p style={{ fontSize: 'medium' }}>
+                    choose an instrument and upload a midi file to generate its
+                    best possible tabs!
+                  </p>
+                </Form.Label>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: 'auto'
+                  }}
                 >
-                  Settings
-                </Button>
-              </div>
-              <br></br>
-              <Piano
-                noteRange={{ first: firstNote, last: lastNote }}
-                playNote={midiNumber => {
-                  var note = require('midi-note')
-                  console.log(note(midiNumber).toLowerCase())
-                  setInput(input + " " + note(midiNumber).toLowerCase())
-                  console.log(MidiNumbers.fromNote(note(midiNumber).toLowerCase()))
-                }}
-                stopNote={midiNumber => {
-                  var note = require('midi-note')
-                  //console.log(note(midiNumber))
-                }}
-                width={1000}
-              />
-              <p style={{ marginTop: '1vh', fontSize: 'large' }}>
-                current instrument: {map1.get(radioValue)}
-              </p>
-            </Form.Group>
-          </Form>
+                  <Form.Control
+                    type='file'
+                    onChange={e => setMidi(e)}
+                    style={{ marginRight: '.5vw' }}
+                  />
+                  <Button variant='success' onClick={uploadFile}>
+                    Submit
+                  </Button>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: 'auto'
+                  }}
+                >
+                  <Button
+                    variant='secondary'
+                    onClick={() => handleSettingsShow(true)}
+                  >
+                    Settings
+                  </Button>
+                  <a
+                    target='_blank'
+                    href='sample_monophonic_pentatonic.mid'
+                    download
+                  >
+                    <Button variant='primary'>
+                      <BsDownload></BsDownload> sample midi
+                    </Button>
+                  </a>
+                </div>
+                <p
+                  style={{
+                    marginTop: '1vh',
+                    fontSize: 'large',
+                    fontFamily: 'monospace',
+                    textAlign: 'left'
+                  }}
+                >
+                  instrument setting: {map1.get(radioValue)}
+                </p>
+              </Form.Group>
+            </Form>
+          </FadeIn>
+        )}
+        {menu === 2 && (
+          <>
+            <Form style={{ width: '30vw' }}>
+              <FadeIn>
+                <Form.Group
+                  onChange={uploadFile}
+                  controlId='formFile'
+                  className='mb-3'
+                >
+                  <Form.Label>
+                    <p style={{ fontSize: 'medium' }}>
+                      type in a series of notes to generate its best possible
+                      tabs!
+                    </p>
+                  </Form.Label>
+                  <div>
+                    <Form.Control
+                      as='textarea'
+                      rows={3}
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                    />
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <Button
+                        variant='secondary'
+                        onClick={() => handleSettingsShow(true)}
+                      >
+                        Settings
+                      </Button>
+                      <Button
+                        variant='success'
+                        onClick={() => uploadNotesData()}
+                      >
+                        Submit
+                      </Button>
+                    </div>
+                  </div>
+                  {menu === 2 && (
+                    <p
+                      style={{
+                        marginTop: '1vh',
+                        fontSize: 'large',
+                        fontFamily: 'monospace',
+                        textAlign: 'left'
+                      }}
+                    >
+                      input setting: {mapAccidental.get(accidentals)}
+                    </p>
+                  )}
+                  <p
+                    style={{
+                      marginTop: '1vh',
+                      fontSize: 'large',
+                      fontFamily: 'monospace',
+                      textAlign: 'left'
+                    }}
+                  >
+                    instrument setting: {map1.get(radioValue)}
+                  </p>
+                </Form.Group>
+              </FadeIn>
+            </Form>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <FadeIn>
+                <Piano
+                  noteRange={{ first: firstNote, last: lastNote }}
+                  playNote={midiNumber => {
+                    var note = require('midi-note')
+                    if (accidentals === 0) {
+                      var sharps = true
+                    } else {
+                      var sharps = false
+                    }
+                    var noteName = Midi.midiToNoteName(midiNumber, {
+                      sharps: sharps
+                    })
+                    setInput(input + ' ' + noteName)
+                    console.log(noteName)
+                  }}
+                  stopNote={midiNumber => {
+                    //console.log(note(midiNumber))
+                  }}
+                  width={600}
+                  style={{ align: 'center' }}
+                />
+                <br></br>
+              </FadeIn>
+            </div>
+          </>
         )}
         <Modal
           show={settingsShow}
@@ -444,8 +650,7 @@ export default function App () {
                 </div>
               </>
             )}
-            <br></br>
-            <ButtonGroup>
+            <ButtonGroup className='mb-2'>
               <ToggleButton
                 type='radio'
                 variant='secondary'
@@ -483,6 +688,34 @@ export default function App () {
                 avoid open strings
               </ToggleButton>
             </ButtonGroup>
+            {menu === 2 && (
+              <ButtonGroup className='mb-2'>
+                <ToggleButton
+                  type='radio'
+                  variant='secondary'
+                  name='acc1'
+                  key='acc1'
+                  id='acc1'
+                  value={0}
+                  checked={accidentals === 0}
+                  onChange={() => setAccidentals(0)}
+                >
+                  sharps
+                </ToggleButton>
+                <ToggleButton
+                  type='radio'
+                  variant='secondary'
+                  name='acc2'
+                  key='acc2'
+                  id='acc2'
+                  value={1}
+                  checked={accidentals === 1}
+                  onChange={() => setAccidentals(1)}
+                >
+                  flats
+                </ToggleButton>
+              </ButtonGroup>
+            )}
           </Modal.Body>
           <Modal.Footer>
             <Button variant='primary' onClick={() => handleSettingsShow(false)}>
@@ -505,21 +738,21 @@ export default function App () {
         )}
         {load && <Spinner animation='border' variant='primary' />}
         <div>
-          {tab1.length > 0 && !load && menu != 0 && (
+          {tab1.length > 0 && !load && menu !== 0 && (
             <>
               <Button onClick={() => handleChange(1)} variant='primary'>
                 View tab 1
               </Button>{' '}
             </>
           )}
-          {tab2.length > 0 && !load && menu != 0 && (
+          {tab2.length > 0 && !load && menu !== 0 && (
             <>
               <Button onClick={() => handleChange(2)} variant='primary'>
                 View tab 2
               </Button>{' '}
             </>
           )}
-          {tab3.length > 0 && !load && menu != 0 && (
+          {tab3.length > 0 && !load && menu !== 0 && (
             <>
               <Button onClick={() => handleChange(3)} variant='primary'>
                 View tab 3
@@ -528,26 +761,30 @@ export default function App () {
           )}
         </div>
         <br></br>
-        {menu != 0 && (
-          <Button variant='secondary' onClick={() => goBack()}>
-            Go back
-          </Button>
+        {menu !== 0 && (
+          <FadeIn>
+            <Button variant='secondary' onClick={() => goBack()}>
+              Go back
+            </Button>
+          </FadeIn>
         )}
         <br></br>
       </header>
       <br></br>
-      {menu != 0 && midiFile && (
+      {menu !== 0 && (
         <div style={{ marginBottom: '3vh' }}>
-          <MidiPlayer data={midiFile}></MidiPlayer>
+          <FadeIn>
+            <MidiPlayer data={midiFile}></MidiPlayer>
+          </FadeIn>
         </div>
       )}
-      {view1 && menu != 0 && (
+      {view1 && menu !== 0 && (
         <TabDisplay cost={cost1} tab={tab1} filename={filename} num={1} />
       )}
-      {view2 && menu != 0 && (
+      {view2 && menu !== 0 && (
         <TabDisplay cost={cost2} tab={tab2} filename={filename} num={2} />
       )}
-      {view3 && menu != 0 && (
+      {view3 && menu !== 0 && (
         <TabDisplay cost={cost3} tab={tab3} filename={filename} num={3} />
       )}
     </div>
