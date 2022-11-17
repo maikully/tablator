@@ -7,8 +7,8 @@ from flask import Flask, current_app, jsonify, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
 
-RANGES_GUITAR = [23,23,23,23,23,23]  # fret range of each string
-RANGES_BASS = [18, 18, 18, 18]  # fret range of each string
+RANGES_GUITAR = [24,24,24,24,24,24]  # fret range of each string
+RANGES_BASS = [24, 24, 24, 24]  # fret range of each string
 # STARTS = [53,58,63,68,72,77] # starts on first fret of each string
 STARTS_GUITAR = [40, 45, 50, 55, 59, 64]  # starts on first fret of each string - guitar
 STARTS_BASS = [28, 33, 38, 43]  # starts on first fret of each string - bass

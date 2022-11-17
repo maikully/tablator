@@ -10,6 +10,9 @@ import TabDisplay from './TabDisplay'
 import Spinner from 'react-bootstrap/Spinner'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import { BsDownload } from 'react-icons/bs'
+import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano'
+import { midiNumToNote } from './funs'
+import 'react-piano/dist/styles.css'
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
@@ -21,6 +24,13 @@ export default function App () {
 
     return truncatedNum / multiplier
   }
+  const [firstNote, setFirstNote] = useState(40)
+  const [lastNote, setLastNote] = useState(88)
+  const keyboardShortcuts = KeyboardShortcuts.create({
+    firstNote: firstNote,
+    lastNote: lastNote,
+    keyboardConfig: KeyboardShortcuts.HOME_ROW
+  })
   const handleChange = i => {
     switch (i) {
       case 1:
@@ -46,14 +56,40 @@ export default function App () {
   const handleShow = () => setShow(true)
   const handleSettingsShow = x => setSettingsShow(x)
   const setRadio = x => {
+    switch (x) {
+      case 0:
+        setFirstNote(MidiNumbers.fromNote('e2'))
+        setLastNote(MidiNumbers.fromNote('e6'))
+        break
+      case 1:
+        setFirstNote(MidiNumbers.fromNote('e1'))
+        setLastNote(MidiNumbers.fromNote('g4'))
+        break
+      default:
+        break
+    }
+    console.log(firstNote.toString() + lastNote.toString())
     setRadioValue(x)
     if (x === 2) setCustom(true)
     else setCustom(false)
+  }
+  const goBack = () => {
+    setMenu(0)
+    setTab1([])
+    setTab2([])
+    setTab3([])
+    setView1(false)
+    setView2(false)
+    setView3(false)
+    setFile(null)
+    setOpen(0)
+    setRadio(0)
   }
   const map1 = new Map()
   map1.set(0, 'guitar')
   map1.set(1, 'bass')
   map1.set(2, 'custom')
+  const [menu, setMenu] = useState(0)
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
   const [custom, setCustom] = useState(false)
@@ -72,6 +108,7 @@ export default function App () {
   const [midiFile, setFile] = useState(null)
   const [load, setLoading] = useState(false)
   const [alert, setAlert] = useState(false)
+  const [input, setInput] = useState("")
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const downloadTxtFile = tab => {
@@ -200,45 +237,110 @@ export default function App () {
       </Modal>
       <header className='App-header'>
         <h1>tablator</h1>
-        <Form>
-          <Form.Group
-            onChange={uploadFile}
-            controlId='formFile'
-            className='mb-3'
-          >
-            <Form.Label>
-              <p style={{ fontSize: 'medium' }}>
-                choose an instrument and upload a midi file to generate its best
-                possible tabs!
-              </p>
-            </Form.Label>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: 'auto'
-              }}
+        {menu == 0 && (
+          <>
+            <br></br>
+            <Button
+              variant='primary'
+              onClick={() => setMenu(1)}
+              style={{ width: '15%' }}
             >
-              <Form.Control type='file' />{' '}
-              <Button
-                variant='secondary'
-                onClick={() => handleSettingsShow(true)}
+              Create tab from midi file
+            </Button>
+            <br></br>
+            <Button
+            disabled
+              variant='primary'
+              onClick={() => setMenu(2)}
+              style={{ width: '15%' }}
+            >
+              Create tab from note sequence
+            </Button>
+          </>
+        )}
+        {menu == 1 && (
+          <Form>
+            <Form.Group
+              onChange={uploadFile}
+              controlId='formFile'
+              className='mb-3'
+            >
+              <Form.Label>
+                <p style={{ fontSize: 'medium' }}>
+                  choose an instrument and upload a midi file to generate its
+                  best possible tabs!
+                </p>
+              </Form.Label>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 'auto'
+                }}
               >
-                Settings
-              </Button>
-            </div>
-            <p style={{ marginTop: '1vh', fontSize: 'large' }}>
-              current instrument: {map1.get(radioValue)}
-            </p>
-          </Form.Group>
-        </Form>
-        {!midiFile && (
+                <Form.Control type='file' />{' '}
+                <Button
+                  variant='secondary'
+                  onClick={() => handleSettingsShow(true)}
+                >
+                  Settings
+                </Button>
+              </div>
+              <p style={{ marginTop: '1vh', fontSize: 'large' }}>
+                current instrument: {map1.get(radioValue)}
+              </p>
+            </Form.Group>
+          </Form>
+        )}
+        {menu == 1 && !midiFile && (
           <a target='_blank' href='sample_monophonic_pentatonic.mid' download>
             <Button variant='primary'>
               <BsDownload></BsDownload> sample midi
             </Button>
           </a>
+        )}
+        {menu == 2 && (
+          <Form>
+            <Form.Group
+              onChange={uploadFile}
+              controlId='formFile'
+              className='mb-3'
+            >
+              <Form.Label>
+                <p style={{ fontSize: 'medium' }}>
+                  type in a series of notes to generate its best possible tabs!
+                </p>
+              </Form.Label>
+              <div>
+                <Form.Control as='textarea' rows={3} value={input} onChange={(e) => setInput(e.target.value)} />
+                <Button
+                  variant='secondary'
+                  onClick={() => handleSettingsShow(true)}
+                >
+                  Settings
+                </Button>
+              </div>
+              <br></br>
+              <Piano
+                noteRange={{ first: firstNote, last: lastNote }}
+                playNote={midiNumber => {
+                  var note = require('midi-note')
+                  console.log(note(midiNumber).toLowerCase())
+                  setInput(input + " " + note(midiNumber).toLowerCase())
+                  console.log(MidiNumbers.fromNote(note(midiNumber).toLowerCase()))
+                }}
+                stopNote={midiNumber => {
+                  var note = require('midi-note')
+                  //console.log(note(midiNumber))
+                }}
+                width={1000}
+              />
+              <p style={{ marginTop: '1vh', fontSize: 'large' }}>
+                current instrument: {map1.get(radioValue)}
+              </p>
+            </Form.Group>
+          </Form>
         )}
         <Modal
           show={settingsShow}
@@ -403,21 +505,21 @@ export default function App () {
         )}
         {load && <Spinner animation='border' variant='primary' />}
         <div>
-          {tab1.length > 0 && !load && (
+          {tab1.length > 0 && !load && menu != 0 && (
             <>
               <Button onClick={() => handleChange(1)} variant='primary'>
                 View tab 1
               </Button>{' '}
             </>
           )}
-          {tab2.length > 0 && !load && (
+          {tab2.length > 0 && !load && menu != 0 && (
             <>
               <Button onClick={() => handleChange(2)} variant='primary'>
                 View tab 2
               </Button>{' '}
             </>
           )}
-          {tab3.length > 0 && !load && (
+          {tab3.length > 0 && !load && menu != 0 && (
             <>
               <Button onClick={() => handleChange(3)} variant='primary'>
                 View tab 3
@@ -426,20 +528,26 @@ export default function App () {
           )}
         </div>
         <br></br>
+        {menu != 0 && (
+          <Button variant='secondary' onClick={() => goBack()}>
+            Go back
+          </Button>
+        )}
+        <br></br>
       </header>
       <br></br>
-      {midiFile && (
+      {menu != 0 && midiFile && (
         <div style={{ marginBottom: '3vh' }}>
           <MidiPlayer data={midiFile}></MidiPlayer>
         </div>
       )}
-      {view1 && (
+      {view1 && menu != 0 && (
         <TabDisplay cost={cost1} tab={tab1} filename={filename} num={1} />
       )}
-      {view2 && (
+      {view2 && menu != 0 && (
         <TabDisplay cost={cost2} tab={tab2} filename={filename} num={2} />
       )}
-      {view3 && (
+      {view3 && menu != 0 && (
         <TabDisplay cost={cost3} tab={tab3} filename={filename} num={3} />
       )}
     </div>
