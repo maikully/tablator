@@ -57,6 +57,7 @@ export default function App () {
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
   const [custom, setCustom] = useState(false)
+  const [open, setOpen] = useState(0)
   const [radioValue, setRadioValue] = useState(0)
   const [tab1, setTab1] = useState([])
   const [tab2, setTab2] = useState([])
@@ -122,6 +123,7 @@ export default function App () {
         data.append('file', file)
         data.append('width', width)
         data.append('instrument', instrument)
+        data.append('opensetting', open)
         setLoading(true)
         let response = await fetch(url, {
           method: 'post',
@@ -182,6 +184,13 @@ export default function App () {
           any polyphonic parts (if two consecutive notes have the exact same
           note-on time), the program only uses one of the notes. Any notes
           outside the range of the chosen instrument will be octave-shifted in.
+          <br></br>
+          <br></br>
+          If fewer than three tabs are visible, it's because the algorithm
+          didn't find three tabs dissimilar enough. The algorithm won't choose a
+          very bad path in lieu of a dissimlar good path because of the
+          "filtering" done while calculating the best paths during the dynamic
+          programming step.
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>
@@ -208,10 +217,10 @@ export default function App () {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: 'auto',
+                height: 'auto'
               }}
             >
-              <Form.Control type='file'  />{' '}
+              <Form.Control type='file' />{' '}
               <Button
                 variant='secondary'
                 onClick={() => handleSettingsShow(true)}
@@ -231,8 +240,12 @@ export default function App () {
             </Button>
           </a>
         )}
-        <Modal show={settingsShow} onHide={() => handleSettingsShow(false)}>
-          <Modal.Header closeButton>
+        <Modal
+          show={settingsShow}
+          backdrop='static'
+          onHide={() => handleSettingsShow(false)}
+        >
+          <Modal.Header>
             <Modal.Title>Settings</Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -272,9 +285,9 @@ export default function App () {
                 checked={radioValue === 2}
                 onChange={() => setRadio(2)}
               >
-                Custom
+                Custom (coming soon!)
               </ToggleButton>
-            </ButtonGroup>
+            </ButtonGroup>{' '}
             {custom && (
               <>
                 <Form.Label>
@@ -329,13 +342,49 @@ export default function App () {
                 </div>
               </>
             )}
+            <br></br>
+            <ButtonGroup>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='buttondefault'
+                key={'buttondefault'}
+                id={'buttondefault'}
+                value={'buttondefault'}
+                checked={open === 0}
+                onChange={() => setOpen(0)}
+              >
+                default
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='buttonprioritize'
+                key={'buttonprioritize'}
+                id={'buttonprioritize'}
+                value={'buttonprioritize'}
+                checked={open === 1}
+                onChange={() => setOpen(1)}
+              >
+                prioritize open strings
+              </ToggleButton>
+              <ToggleButton
+                type='radio'
+                variant='secondary'
+                name='buttonavoid'
+                key={'buttonavoid'}
+                id={'buttonavoid'}
+                value={'buttonavoid'}
+                checked={open === 2}
+                onChange={() => setOpen(2)}
+              >
+                avoid open strings
+              </ToggleButton>
+            </ButtonGroup>
           </Modal.Body>
           <Modal.Footer>
-            <Button
-              variant='secondary'
-              onClick={() => handleSettingsShow(false)}
-            >
-              Close
+            <Button variant='primary' onClick={() => handleSettingsShow(false)}>
+              Save
             </Button>
           </Modal.Footer>
         </Modal>

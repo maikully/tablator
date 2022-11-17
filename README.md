@@ -43,6 +43,8 @@ python3 base.py
 - [ ] display note fingerings alongside note
 - [ ] add option to not prioritize open strings or lower frets  
 - [ ] add custom tunings
+- [ ] display as score using Lilypond
+- [x] leave out similar tabs
 - [x] add bass tabs
 - [x] add loading throbber
 - [x] double-digit frets being cut in half at wrap
