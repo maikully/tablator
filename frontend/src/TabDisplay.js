@@ -28,8 +28,11 @@ function TabDisplay (props) {
             <Popover.Header as='h3'>{'What is difficulty?'}</Popover.Header>
             <Popover.Body>
               The difficulty of a tab is proportional to the average cost per
-              note in the tab. A higher difficulty means the fingerings are more
-              awkward to play, or higher on the fretboard.
+              note in the tab. A higher difficulty means the fingerings are, on
+              average, more awkward to play or higher on the fretboard. Note
+              that the cost function varies with some of the settings, so
+              comparing difficulties across different settings might not
+              work well.
             </Popover.Body>
           </Popover>
         }
