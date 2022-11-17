@@ -44,6 +44,7 @@ python3 base.py
 - [ ] add option to not prioritize open strings or lower frets  
 - [ ] add custom tunings
 - [ ] display as score using Lilypond
+- [ ] option to download composed midi
 - [x] piano input
 - [x] leave out similar tabs
 - [x] add bass tabs
