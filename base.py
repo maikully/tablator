@@ -51,6 +51,14 @@ def process_file():
         ranges = RANGES_BASS
         strings = STRINGS_BASS
         total_range = TOTAL_BASS_RANGE
+    elif instrument == "custom":
+        starts = [int(x) for x in request.form["customStrings"].split(',')]
+        print(starts)
+        ranges = RANGES_GUITAR
+        total_range = starts[-1] - starts[0] + ranges[-1]
+        strings = request.form["stringsNames"].split(',')
+        strings.reverse()
+        print(strings)
     num_strings = len(strings)
     if request.method == 'POST':
         # check if the post request has the file part
@@ -79,7 +87,6 @@ def process_file():
     costs = []
     paths_chosen = []
     measure_similarity(sorted_paths[0][1], sorted_paths[1][1])
-    print(len(sorted_paths))
     for i, (cost, path) in enumerate(sorted_paths):
         if counter < 3:
             to_check = tuple([x[0] for x in path])
@@ -88,7 +95,6 @@ def process_file():
             else:
                 max_similarity = 0
                 for x in seen:
-                    print(measure_similarity(to_check, x))
                     if measure_similarity(to_check, x) > max_similarity:
                         max_similarity = measure_similarity(to_check, x)
                 if max_similarity > .95:

@@ -37,7 +37,6 @@ def compute_cost(position1, position2, settings):
     # ignore cost of higher frets
     if highersetting == 1:
         cost1 = 0
-        print("asdasd")
     # prioritize higher frets
     elif highersetting == 2:
         cost1 = -np.sqrt(fret1 + fret2) * .1
@@ -45,8 +44,6 @@ def compute_cost(position1, position2, settings):
         # weigh the fret values themselves
         cost1 = np.sqrt(fret1 + fret2) * .1
 
-    print(highersetting)
-    print(cost1)
     expected_fret = fret1 + (finger2 - finger1)
 
     

@@ -13,7 +13,7 @@ function TabDisplay (props) {
       }
     )
     element.href = URL.createObjectURL(file)
-    element.download = props.filename + '.txt'
+    element.download = "tab"+ '.txt'
     document.body.appendChild(element) // Required for this to work in FireFox
     element.click()
   }

@@ -63,28 +63,39 @@ var MAX_MIDI_NUMBER = 127;
 var NOTE_REGEX = /([a-g])([#b]?)(\d+)/;
 var NOTES_IN_OCTAVE = 12; // Converts string notes in scientific pitch notation to a MIDI number, or null.
 
-export default function midiNumToNote(note) {
-    if (!note) {
-      throw Error('Invalid note argument');
-    }
-  
-    var match = NOTE_REGEX.exec(note.toLowerCase());
-  
-    if (!match) {
-      throw Error('Invalid note argument');
-    }
-  
-    var _match = _slicedToArray(match, 4),
-        letter = _match[1],
-        accidental = _match[2],
-        octave = _match[3];
-  
-    var pitchName = "".concat(letter.toUpperCase()).concat(accidental);
-    var pitchIndex = PITCH_INDEXES[pitchName];
-  
-    if (pitchIndex == null) {
-      throw Error('Invalid note argument');
-    }
-  
-    return MIDI_NUMBER_C0 + pitchIndex + NOTES_IN_OCTAVE * parseInt(octave, 10);
+
+export function dataURItoBlob (dataURI) {
+  // convert base64 to raw binary data held in a string
+  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+  var byteString = atob(dataURI.split(',')[1])
+
+  // separate out the mime component
+  var mimeString = dataURI
+    .split(',')[0]
+    .split(':')[1]
+    .split(';')[0]
+
+  // write the bytes of the string to an ArrayBuffer
+  var ab = new ArrayBuffer(byteString.length)
+
+  // create a view into the buffer
+  var ia = new Uint8Array(ab)
+
+  // set the bytes of the buffer to the correct values
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i)
   }
+
+  // write the ArrayBuffer to a blob, and you're done
+  var blob = new Blob([ab], { type: mimeString })
+  return blob
+}
+
+
+export const truncateDecimals = function (number, digits) {
+  var multiplier = Math.pow(10, digits),
+    adjustedNum = number * multiplier,
+    truncatedNum = Math[adjustedNum < 0 ? 'ceil' : 'floor'](adjustedNum)
+
+  return truncatedNum / multiplier
+}

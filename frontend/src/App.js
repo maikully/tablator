@@ -13,18 +13,12 @@ import { BsDownload } from 'react-icons/bs'
 import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano'
 import { Interval, Note, Scale, Midi } from '@tonaljs/tonal'
 import 'react-piano/dist/styles.css'
+import { dataURItoBlob, truncateDecimals } from './funs'
 import FadeIn from 'react-fade-in'
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
   const url = 'https://tablator.herokuapp.com/tablator'
-  const truncateDecimals = function (number, digits) {
-    var multiplier = Math.pow(10, digits),
-      adjustedNum = number * multiplier,
-      truncatedNum = Math[adjustedNum < 0 ? 'ceil' : 'floor'](adjustedNum)
-
-    return truncatedNum / multiplier
-  }
   const [firstNote, setFirstNote] = useState(40)
   const [lastNote, setLastNote] = useState(88)
   const MidiWriter = require('midi-writer-js')
@@ -56,7 +50,30 @@ export default function App () {
   }
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
-  const handleSettingsShow = x => setSettingsShow(x)
+  const handleSettingsShow = x => {
+    if (custom && !x) {
+      try {
+        MidiNumbers.fromNote(stringOne)
+        MidiNumbers.fromNote(stringTwo)
+        MidiNumbers.fromNote(stringThree)
+        MidiNumbers.fromNote(stringFour)
+        MidiNumbers.fromNote(stringFive)
+        MidiNumbers.fromNote(stringSix)
+      } catch (e) {
+        setError('One or more strings are invalid')
+        showStringError(true)
+        return
+      }
+      if (MidiNumbers.fromNote(stringOne) >= MidiNumbers.fromNote(stringSix)) {
+        setError('String one must be lower than string one')
+        showStringError(true)
+        return
+      }
+      setFirstNote(MidiNumbers.fromNote(stringOne))
+      setLastNote(MidiNumbers.fromNote(stringSix) + 24)
+    }
+    setSettingsShow(x)
+  }
   const setRadio = x => {
     switch (x) {
       case 0:
@@ -71,8 +88,9 @@ export default function App () {
         break
     }
     setRadioValue(x)
-    if (x === 2) setCustom(true)
-    else setCustom(false)
+    if (x === 2) {
+      setCustom(true)
+    } else setCustom(false)
   }
   const goBack = () => {
     setMenu(0)
@@ -87,19 +105,30 @@ export default function App () {
     setRadio(0)
     setAlert(false)
     setInput('')
+    setAccidentals(0)
+    setHigher(0)
   }
-  const map1 = new Map()
-  map1.set(0, 'guitar')
-  map1.set(1, 'bass')
-  map1.set(2, 'custom')
+  const mapInstrument = new Map()
+  mapInstrument.set(0, 'guitar')
+  mapInstrument.set(1, 'bass')
+  mapInstrument.set(2, 'custom')
   const mapAccidental = new Map()
   mapAccidental.set(0, 'sharps')
   mapAccidental.set(1, 'flats')
-  const [alertmessage, setAlertmessage] = useState("")
+  const [dataURI, setDataURI] = useState('')
+  const [alertmessage, setAlertmessage] = useState('')
+  const [error, setError] = useState('')
+  const [showError, showStringError] = useState(false)
   const [accidentals, setAccidentals] = useState(0)
   const [menu, setMenu] = useState(0)
   const [show, setShow] = useState(false)
   const [settingsShow, setSettingsShow] = useState(false)
+  const [stringOne, setStringOne] = useState('E2')
+  const [stringTwo, setStringTwo] = useState('A2')
+  const [stringThree, setStringThree] = useState('D3')
+  const [stringFour, setStringFour] = useState('G3')
+  const [stringFive, setStringFive] = useState('B3')
+  const [stringSix, setStringSix] = useState('E4')
   const [custom, setCustom] = useState(false)
   const [open, setOpen] = useState(0)
   const [radioValue, setRadioValue] = useState(0)
@@ -121,19 +150,6 @@ export default function App () {
   const [higher, setHigher] = useState(0)
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
-  const downloadTxtFile = tab => {
-    const element = document.createElement('a')
-    const file = new Blob(
-      tab.map(x => x + '\n'),
-      {
-        type: 'text/plain'
-      }
-    )
-    element.href = URL.createObjectURL(file)
-    element.download = filename + '.txt'
-    document.body.appendChild(element) // Required for this to work in FireFox
-    element.click()
-  }
   const setMidi = e => {
     const file = e.target.files[0]
     const extension = e.target.files[0].name
@@ -142,7 +158,7 @@ export default function App () {
       .toLowerCase()
       .trim()
     if (extension !== 'mid' && extension !== 'midi') {
-      setAlertmessage("file type not mid or midi!")
+      setAlertmessage('file type not mid or midi!')
       setAlert(true)
     } else {
       setAlert(false)
@@ -161,7 +177,7 @@ export default function App () {
       .toLowerCase()
       .trim()
     if (extension !== 'mid' && extension !== 'midi') {
-      setAlertmessage("file type not mid or midi!")
+      setAlertmessage('file type not mid or midi!')
       setAlert(true)
     } else {
       setAlert(false)
@@ -192,6 +208,24 @@ export default function App () {
         data.append('instrument', instrument)
         data.append('opensetting', open)
         data.append('higher', higher)
+        if (custom) {
+          data.append('customStrings', [
+            MidiNumbers.fromNote(stringOne),
+            MidiNumbers.fromNote(stringTwo),
+            MidiNumbers.fromNote(stringThree),
+            MidiNumbers.fromNote(stringFour),
+            MidiNumbers.fromNote(stringFive),
+            MidiNumbers.fromNote(stringSix)
+          ])
+          data.append('stringsNames', [
+            Note.pitchClass(stringOne),
+            Note.pitchClass(stringTwo),
+            Note.pitchClass(stringThree),
+            Note.pitchClass(stringFour),
+            Note.pitchClass(stringFive),
+            Note.pitchClass(stringSix)
+          ])
+        }
         setLoading(true)
         let response = await fetch(url, {
           method: 'post',
@@ -220,39 +254,13 @@ export default function App () {
       }
     }
   }
-  function dataURItoBlob (dataURI) {
-    // convert base64 to raw binary data held in a string
-    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-    var byteString = atob(dataURI.split(',')[1])
-
-    // separate out the mime component
-    var mimeString = dataURI
-      .split(',')[0]
-      .split(':')[1]
-      .split(';')[0]
-
-    // write the bytes of the string to an ArrayBuffer
-    var ab = new ArrayBuffer(byteString.length)
-
-    // create a view into the buffer
-    var ia = new Uint8Array(ab)
-
-    // set the bytes of the buffer to the correct values
-    for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i)
-    }
-
-    // write the ArrayBuffer to a blob, and you're done
-    var blob = new Blob([ab], { type: mimeString })
-    return blob
-  }
   const uploadNotesData = async e => {
-    var data = input.trim().split(' ')
+    var data = input.trim().split(/\s+/)
     if (data.length === 1) {
-      setAlertmessage("input must contain at least 2 notes!")
+      setAlertmessage('input must contain at least 2 notes!')
       setAlert(true)
       return
-    } else{
+    } else {
       setAlert(false)
     }
     const track = new MidiWriter.Track()
@@ -274,6 +282,7 @@ export default function App () {
       setFile(data)
       //=> ArrayBuffer {byteLength: ...}
     })
+    setDataURI(write.dataUri())
     var file = dataURItoBlob(write.dataUri())
     if (file !== null) {
       var instrument = ''
@@ -298,6 +307,24 @@ export default function App () {
       data.append('instrument', instrument)
       data.append('opensetting', open)
       data.append('higher', higher)
+      if (custom) {
+        data.append('customStrings', [
+          MidiNumbers.fromNote(stringOne),
+          MidiNumbers.fromNote(stringTwo),
+          MidiNumbers.fromNote(stringThree),
+          MidiNumbers.fromNote(stringFour),
+          MidiNumbers.fromNote(stringFive),
+          MidiNumbers.fromNote(stringSix)
+        ])
+        data.append('stringsNames', [
+          stringOne,
+          stringTwo,
+          stringThree,
+          stringFour,
+          stringFive,
+          stringSix
+        ])
+      }
       setLoading(true)
       let response = await fetch(url, {
         method: 'post',
@@ -331,7 +358,7 @@ export default function App () {
         <Button
           variant='secondary'
           onClick={handleShow}
-          size="sm"
+          size='sm'
           style={{ marginTop: '2vh', marginRight: '2vw' }}
         >
           About
@@ -348,14 +375,14 @@ export default function App () {
           greatly impacts the playability of the passage: a better fingering
           means an easier time playing. This program uses a dynamic programming
           algorithm to find the three best possible fingering sequences for a
-          sequence of notes. 
-          To start, type in the notes with the virtual keyboard or upload a midi file!
+          sequence of notes. To start, type in the notes with the virtual
+          keyboard or upload a midi file!
           <br></br>
           <br></br>
-          Currently, the program will only work on monophonic parts. For
-          any polyphonic parts (if two consecutive notes have the exact same
-          note-on time), the program only uses one of the notes. Any notes
-          outside the range of the chosen instrument will be octave-shifted in.
+          Currently, the program will only work on monophonic parts. For any
+          polyphonic parts (if two consecutive notes have the exact same note-on
+          time), the program only uses one of the notes. Any notes outside the
+          range of the chosen instrument will be octave-shifted in.
           <br></br>
           <br></br>
           If fewer than three tabs are visible, it's because the algorithm
@@ -371,7 +398,9 @@ export default function App () {
         </Modal.Footer>
       </Modal>
       <header className='App-header'>
-        <h1 className="title" onClick={goBack}>tablator</h1>
+        <h1 className='title' onClick={goBack}>
+          tablator
+        </h1>
         {menu === 0 && (
           <FadeIn>
             <br></br>
@@ -382,11 +411,11 @@ export default function App () {
             >
               Create tab from note sequence
             </Button>
-            <br></br> 
+            <br></br>
             <Button
               variant='primary'
               onClick={() => setMenu(1)}
-              style={{ width: '300px' }}
+              style={{ width: '300px', marginBottom:"2vh" }}
             >
               Create tab from midi file
             </Button>
@@ -451,7 +480,7 @@ export default function App () {
                     textAlign: 'left'
                   }}
                 >
-                  instrument setting: {map1.get(radioValue)}
+                  instrument setting: {mapInstrument.get(radioValue)}
                 </p>
               </Form.Group>
             </Form>
@@ -519,7 +548,7 @@ export default function App () {
                       textAlign: 'left'
                     }}
                   >
-                    instrument setting: {map1.get(radioValue)}
+                    instrument setting: {mapInstrument.get(radioValue)}
                   </p>
                 </Form.Group>
               </FadeIn>
@@ -549,13 +578,17 @@ export default function App () {
                 <br></br>
               </FadeIn>
             </div>
+
+            {menu === 2 && midiFile && (
+              <FadeIn>
+                <a href={dataURI}>
+                  <Button  style={{marginBottom:"5vh"}} variant='primary'>play midi file</Button>
+                </a>
+              </FadeIn>
+            )}
           </>
         )}
-        <Modal
-          show={settingsShow}
-          backdrop='static'
-          onHide={() => handleSettingsShow(false)}
-        >
+        <Modal show={settingsShow} backdrop='static'>
           <Modal.Header>
             <Modal.Title>Settings</Modal.Title>
           </Modal.Header>
@@ -571,7 +604,7 @@ export default function App () {
                 checked={radioValue === 0}
                 onChange={() => setRadio(0)}
               >
-                Guitar
+                guitar
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -583,36 +616,35 @@ export default function App () {
                 checked={radioValue === 1}
                 onChange={() => setRadio(1)}
               >
-                Bass
+                bass
               </ToggleButton>
               <ToggleButton
                 type='radio'
                 variant='secondary'
                 name='radio'
-                disabled
                 key={2}
                 id={2}
                 value={2}
                 checked={radioValue === 2}
                 onChange={() => setRadio(2)}
               >
-                Custom (coming soon!)
+                custom
               </ToggleButton>
             </ButtonGroup>{' '}
             {custom && (
               <>
-                <Form.Label>
-                  <p style={{ fontSize: 'medium' }}>
-                    enter the six strings (including octave) from low to high
-                    <br></br>
-                    (e.g. E2 A2 D3 G3 B3 E4)
-                  </p>
-                </Form.Label>
+                <p style={{ fontSize: 'medium' }}>
+                  enter the six strings from low to high
+                </p>
                 <div style={{ display: 'flex' }}>
                   <Form.Control
                     type='text'
                     placeholder='1'
                     maxLength='2'
+                    onChange={e => {
+                      setStringOne(e.target.value)
+                    }}
+                    value={stringOne}
                     style={{ width: '3em' }}
                   />
 
@@ -620,6 +652,8 @@ export default function App () {
                     type='text'
                     placeholder='2'
                     maxLength='2'
+                    onChange={e => setStringTwo(e.target.value)}
+                    value={stringTwo}
                     style={{ width: '3em' }}
                   />
 
@@ -627,6 +661,8 @@ export default function App () {
                     type='text'
                     placeholder='3'
                     maxLength='2'
+                    onChange={e => setStringThree(e.target.value)}
+                    value={stringThree}
                     style={{ width: '3em' }}
                   />
 
@@ -634,6 +670,8 @@ export default function App () {
                     type='text'
                     placeholder='4'
                     maxLength='2'
+                    onChange={e => setStringFour(e.target.value)}
+                    value={stringFour}
                     style={{ width: '3em' }}
                   />
 
@@ -641,6 +679,8 @@ export default function App () {
                     type='text'
                     placeholder='5'
                     maxLength='2'
+                    onChange={e => setStringFive(e.target.value)}
+                    value={stringFive}
                     style={{ width: '3em' }}
                   />
 
@@ -648,9 +688,12 @@ export default function App () {
                     type='text'
                     placeholder='6'
                     maxLength='2'
+                    onChange={e => setStringSix(e.target.value)}
+                    value={stringSix}
                     style={{ width: '3em' }}
                   />
                 </div>
+                <br></br>
               </>
             )}
             <ButtonGroup className='mb-2'>
@@ -759,10 +802,34 @@ export default function App () {
             )}
           </Modal.Body>
           <Modal.Footer>
-            <Button variant='primary' onClick={() => handleSettingsShow(false)}>
+            <Button
+              variant='primary'
+              disabled={
+                custom &&
+                !(
+                  stringOne &&
+                  stringTwo &&
+                  stringThree &&
+                  stringFour &&
+                  stringFive &&
+                  stringSix
+                )
+              }
+              onClick={() => handleSettingsShow(false)}
+            >
               Save
             </Button>
           </Modal.Footer>
+        </Modal>
+
+        <Modal size='lg' show={showError} onHide={() => showStringError(false)}>
+          <div
+            class='alert alert-block alert-danger'
+            style={{ marginBottom: '0' }}
+          >
+            <h4>Error!</h4>
+            {error}
+          </div>
         </Modal>
         {alert && (
           <Alert
@@ -778,30 +845,31 @@ export default function App () {
           </Alert>
         )}
         {load && <Spinner animation='border' variant='primary' />}
-        <div>
-          {tab1.length > 0 && !load && menu !== 0 && (
-            <>
-              <Button onClick={() => handleChange(1)} variant='primary'>
-                View tab 1
-              </Button>{' '}
-            </>
-          )}
-          {tab2.length > 0 && !load && menu !== 0 && (
-            <>
-              <Button onClick={() => handleChange(2)} variant='primary'>
-                View tab 2
-              </Button>{' '}
-            </>
-          )}
-          {tab3.length > 0 && !load && menu !== 0 && (
-            <>
-              <Button onClick={() => handleChange(3)} variant='primary'>
-                View tab 3
-              </Button>{' '}
-            </>
-          )}
-        </div>
-        <br></br>
+        <FadeIn>
+          <div >
+            {tab1.length > 0 && !load && menu !== 0 && (
+              <>
+                <Button style={{marginBottom:"5vh"}} onClick={() => handleChange(1)} variant='primary'>
+                  View tab 1
+                </Button>{' '}
+              </>
+            )}
+            {tab2.length > 0 && !load && menu !== 0 && (
+              <>
+                <Button  style={{marginBottom:"5vh"}} onClick={() => handleChange(2)} variant='primary'>
+                  View tab 2
+                </Button>{' '}
+              </>
+            )}
+            {tab3.length > 0 && !load && menu !== 0 && (
+              <>
+                <Button  style={{marginBottom:"5vh"}} onClick={() => handleChange(3)} variant='primary'>
+                  View tab 3
+                </Button>{' '}
+              </>
+            )}
+          </div>
+        </FadeIn>
         {menu !== 0 && (
           <FadeIn>
             <Button variant='secondary' onClick={() => goBack()}>
@@ -812,7 +880,7 @@ export default function App () {
         <br></br>
       </header>
       <br></br>
-      {menu !== 0 && (
+      {menu === 1 && (
         <div style={{ marginBottom: '3vh' }}>
           <FadeIn>
             <MidiPlayer data={midiFile}></MidiPlayer>

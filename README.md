@@ -13,6 +13,7 @@ Currently, the program will only work on monophonic data. For any polyphonic par
 
 ## Features
 
+- create tabs for guitar and bass, or input a custom tuning
 - compose a line using a virtual keyboard and view up to three of its best tabs
 - import a midi file and view up to three of its best tabs
 - play the midi file out loud
@@ -42,11 +43,11 @@ python3 base.py
 - [ ] get chords working
 - [ ] display note fingerings alongside note
 - [ ] add option to not prioritize open strings or lower frets  
-- [ ] add custom tunings
 - [ ] display as score using Lilypond
 - [ ] option to download composed midi
 - [ ] option to octave shift
 - [ ] fix negative difficulty values when prioritizing higher
+- [x] add custom tunings
 - [x] option to ignore fret height
 - [x] piano input
 - [x] leave out similar tabs
