@@ -802,7 +802,7 @@ export default function App () {
                 checked={higher === 0}
                 onChange={() => setHigher(0)}
               >
-                penalize higher frets
+                avoid high frets
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -814,7 +814,7 @@ export default function App () {
                 checked={higher === 1}
                 onChange={() => setHigher(1)}
               >
-                don't penalize higher frets
+                don't avoid high frets
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -826,7 +826,7 @@ export default function App () {
                 checked={higher === 2}
                 onChange={() => setHigher(2)}
               >
-                prioritize higher frets
+                prioritize high frets
               </ToggleButton>
             </ButtonGroup>
             {menu === 2 && (
