@@ -16,6 +16,7 @@
     "react-bootstrap": "^2.6.0",
     "react-dom": "^18.2.0",
     "react-fade-in": "^2.0.1",
+    "react-ga4": "^1.4.1",
     "react-icons": "^4.6.0",
     "react-midi-player": "^1.0.5",
     "react-piano": "^3.1.3",

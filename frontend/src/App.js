@@ -1,8 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
-import { useFilePicker } from 'use-file-picker'
-import { useState, useEffect } from 'react'
-import { Button, ToggleButton, Form, Modal, Fade } from 'react-bootstrap'
+import { useState } from 'react'
+import { Button, ToggleButton, Form, Modal } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
 import $ from 'jquery'
@@ -15,6 +14,10 @@ import { Interval, Note, Scale, Midi } from '@tonaljs/tonal'
 import 'react-piano/dist/styles.css'
 import { dataURItoBlob, truncateDecimals } from './funs'
 import FadeIn from 'react-fade-in'
+import ReactGA from 'react-ga4'
+
+ReactGA.initialize('G-XYYV3V4Q7M');
+ReactGA.send("pageview");
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
