@@ -1,7 +1,6 @@
-import { propTypes } from 'react-bootstrap/esm/Image'
 import Popover from 'react-bootstrap/Popover'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
-import { Button, Form, Modal } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 
 function TabDisplay (props) {
   const downloadTxtFile = tab => {
@@ -13,7 +12,7 @@ function TabDisplay (props) {
       }
     )
     element.href = URL.createObjectURL(file)
-    element.download = "tab"+ '.txt'
+    element.download = 'tab' + '.txt'
     document.body.appendChild(element) // Required for this to work in FireFox
     element.click()
   }
@@ -31,8 +30,8 @@ function TabDisplay (props) {
               note in the tab. A higher difficulty means the fingerings are, on
               average, more awkward to play or higher on the fretboard. Note
               that the cost function varies with some of the settings, so
-              comparing difficulties across different settings might not
-              work well.
+              comparing difficulties across different settings might not work
+              well.
             </Popover.Body>
           </Popover>
         }

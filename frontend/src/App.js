@@ -1,7 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useState } from 'react'
-import { Button, ToggleButton, Form, Modal } from 'react-bootstrap'
+import {
+  Button,
+  ToggleButton,
+  Form,
+  Modal,
+} from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
 import $ from 'jquery'
@@ -16,8 +21,8 @@ import { dataURItoBlob, truncateDecimals } from './funs'
 import FadeIn from 'react-fade-in'
 import ReactGA from 'react-ga4'
 
-ReactGA.initialize('G-XYYV3V4Q7M');
-ReactGA.send("pageview");
+ReactGA.initialize('G-XYYV3V4Q7M')
+ReactGA.send('pageview')
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
@@ -55,7 +60,14 @@ export default function App () {
   const handleShow = () => setShow(true)
   const handleSettingsShow = x => {
     if (custom && !x) {
-      var strings = [stringOne, stringTwo, stringThree, stringFour, stringFive, stringSix]
+      var strings = [
+        stringOne,
+        stringTwo,
+        stringThree,
+        stringFour,
+        stringFive,
+        stringSix
+      ]
       try {
         strings.map(x => MidiNumbers.fromNote(x))
       } catch (e) {
@@ -95,6 +107,7 @@ export default function App () {
   }
   const goBack = () => {
     setMenu(0)
+    setCapo(0)
     setTab1([])
     setTab2([])
     setTab3([])
@@ -149,6 +162,7 @@ export default function App () {
   const [alert, setAlert] = useState(false)
   const [input, setInput] = useState('')
   const [higher, setHigher] = useState(0)
+  const [capo, setCapo] = useState(0)
   // the react post request sender
   const fileToArrayBuffer = require('file-to-array-buffer')
   const setMidi = e => {
@@ -209,6 +223,7 @@ export default function App () {
         data.append('instrument', instrument)
         data.append('opensetting', open)
         data.append('higher', higher)
+        data.append('capo', capo)
         if (custom) {
           data.append('customStrings', [
             MidiNumbers.fromNote(stringOne),
@@ -308,6 +323,7 @@ export default function App () {
       data.append('instrument', instrument)
       data.append('opensetting', open)
       data.append('higher', higher)
+      data.append('capo', capo)
       if (custom) {
         data.append('customStrings', [
           MidiNumbers.fromNote(stringOne),
@@ -416,7 +432,7 @@ export default function App () {
             <Button
               variant='primary'
               onClick={() => setMenu(1)}
-              style={{ width: '300px', marginBottom:"2vh" }}
+              style={{ width: '300px', marginBottom: '2vh' }}
             >
               Create tab from midi file
             </Button>
@@ -478,10 +494,20 @@ export default function App () {
                     marginTop: '1vh',
                     fontSize: 'large',
                     fontFamily: 'monospace',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    marginBottom:'0px'
                   }}
                 >
                   instrument setting: {mapInstrument.get(radioValue)}
+                </p>
+                <p
+                  style={{
+                    fontSize: 'large',
+                    fontFamily: 'monospace',
+                    textAlign: 'left'
+                  }}
+                >
+                  capo position: {capo}
                 </p>
               </Form.Group>
             </Form>
@@ -535,7 +561,8 @@ export default function App () {
                         marginTop: '1vh',
                         fontSize: 'large',
                         fontFamily: 'monospace',
-                        textAlign: 'left'
+                        textAlign: 'left',
+                        marginBottom:'0px'
                       }}
                     >
                       input setting: {mapAccidental.get(accidentals)}
@@ -543,14 +570,24 @@ export default function App () {
                   )}
                   <p
                     style={{
-                      marginTop: '1vh',
                       fontSize: 'large',
                       fontFamily: 'monospace',
-                      textAlign: 'left'
+                      textAlign: 'left',
+                      marginBottom:'0px'
                     }}
                   >
                     instrument setting: {mapInstrument.get(radioValue)}
                   </p>
+                <p
+                  style={{
+                    fontSize: 'large',
+                    fontFamily: 'monospace',
+                    textAlign: 'left',
+                    marginBottom:'2vh'
+                  }}
+                >
+                  capo position: {capo}
+                </p>
                 </Form.Group>
               </FadeIn>
             </Form>
@@ -583,7 +620,9 @@ export default function App () {
             {menu === 2 && midiFile && (
               <FadeIn>
                 <a href={dataURI}>
-                  <Button  style={{marginBottom:"5vh"}} variant='primary'>play midi file</Button>
+                  <Button style={{ marginBottom: '5vh' }} variant='primary'>
+                    <BsDownload></BsDownload> midi file
+                  </Button>
                 </a>
               </FadeIn>
             )}
@@ -634,7 +673,7 @@ export default function App () {
             </ButtonGroup>{' '}
             {custom && (
               <>
-                <p style={{ fontSize: 'medium', marginBottom:"0" }}>
+                <p style={{ fontSize: 'medium', marginBottom: '0' }}>
                   enter the six strings from low to high
                 </p>
                 <div style={{ display: 'flex' }}>
@@ -785,7 +824,7 @@ export default function App () {
                   checked={accidentals === 0}
                   onChange={() => setAccidentals(0)}
                 >
-                  sharps
+                  ♯
                 </ToggleButton>
                 <ToggleButton
                   type='radio'
@@ -797,10 +836,19 @@ export default function App () {
                   checked={accidentals === 1}
                   onChange={() => setAccidentals(1)}
                 >
-                  flats
+                  ♭
                 </ToggleButton>
               </ButtonGroup>
             )}
+            <br></br>
+            Capo position:
+            <Form.Control
+              type='number'
+              style={{ width: '3.5em' }}
+              placeholder={0}
+              value={capo}
+              onChange={(e) => setCapo(e.target.value)}
+            />
           </Modal.Body>
           <Modal.Footer>
             <Button
@@ -847,24 +895,36 @@ export default function App () {
         )}
         {load && <Spinner animation='border' variant='primary' />}
         <FadeIn>
-          <div >
+          <div>
             {tab1.length > 0 && !load && menu !== 0 && (
               <>
-                <Button style={{marginBottom:"5vh"}} onClick={() => handleChange(1)} variant='primary'>
+                <Button
+                  style={{ marginBottom: '5vh' }}
+                  onClick={() => handleChange(1)}
+                  variant='primary'
+                >
                   View tab 1
                 </Button>{' '}
               </>
             )}
             {tab2.length > 0 && !load && menu !== 0 && (
               <>
-                <Button  style={{marginBottom:"5vh"}} onClick={() => handleChange(2)} variant='primary'>
+                <Button
+                  style={{ marginBottom: '5vh' }}
+                  onClick={() => handleChange(2)}
+                  variant='primary'
+                >
                   View tab 2
                 </Button>{' '}
               </>
             )}
             {tab3.length > 0 && !load && menu !== 0 && (
               <>
-                <Button  style={{marginBottom:"5vh"}} onClick={() => handleChange(3)} variant='primary'>
+                <Button
+                  style={{ marginBottom: '5vh' }}
+                  onClick={() => handleChange(3)}
+                  variant='primary'
+                >
                   View tab 3
                 </Button>{' '}
               </>
@@ -881,7 +941,7 @@ export default function App () {
         <br></br>
       </header>
       <br></br>
-      {menu === 1 && (
+      {menu !== 0 && (
         <div style={{ marginBottom: '3vh' }}>
           <FadeIn>
             <MidiPlayer data={midiFile}></MidiPlayer>

@@ -40,19 +40,21 @@ def process_file():
     instrument = request.form["instrument"]
     opensetting = int(request.form["opensetting"])
     highersetting = int(request.form["higher"])
+    capo = int(request.form["capo"])
     settings = (opensetting, highersetting)
     if instrument == "guitar":
-        starts = STARTS_GUITAR
+        starts = [x+capo for x in STARTS_GUITAR]
+        print(starts)
         ranges = RANGES_GUITAR
         strings = STRINGS_GUITAR
         total_range = TOTAL_GUITAR_RANGE
     elif instrument == "bass":
-        starts = STARTS_BASS
+        starts = [x + capo for x in STARTS_BASS]
         ranges = RANGES_BASS
         strings = STRINGS_BASS
         total_range = TOTAL_BASS_RANGE
     elif instrument == "custom":
-        starts = [int(x) for x in request.form["customStrings"].split(',')]
+        starts = [y + capo for y in [int(x) for x in request.form["customStrings"].split(',')]]
         ranges = RANGES_GUITAR
         total_range = starts[-1] - starts[0] + ranges[-1]
         strings = request.form["stringsNames"].split(',')
