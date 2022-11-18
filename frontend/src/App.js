@@ -54,6 +54,7 @@ export default function App () {
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
   const handleSettingsShow = x => {
+    var flag = false
     if (custom && !x) {
       var strings = [
         stringOne,
@@ -64,12 +65,23 @@ export default function App () {
         stringSix
       ]
       try {
-        strings.map(x => MidiNumbers.fromNote(x))
+        strings.map(x => {
+          MidiNumbers.fromNote(x)
+        })
       } catch (e) {
         setError('One or more strings are invalid')
         showStringError(true)
         return
       }
+      strings.map(x => {
+        MidiNumbers.fromNote(x)
+        if (MidiNumbers.fromNote(x) > 127 || !isNaN(x.charAt(0))) {
+          console.log(MidiNumbers.fromNote(x))
+          setError('One or more strings are invalid')
+          showStringError(true)
+          flag = true
+        }
+      })
       /*
       if (MidiNumbers.fromNote(stringOne) >= MidiNumbers.fromNote(stringSix)) {
         setError('String one must be lower than string six')
@@ -77,6 +89,10 @@ export default function App () {
         return
       }
       */
+      if (flag) {
+        return
+      }
+      console.log('asdsads')
       setFirstNote(Math.min(...strings.map(x => MidiNumbers.fromNote(x))))
       setLastNote(Math.max(...strings.map(x => MidiNumbers.fromNote(x))) + 24)
     }
@@ -393,8 +409,8 @@ export default function App () {
           <br></br>
           Currently, the program will only work on monophonic parts. For any
           polyphonic beats (if two consecutive notes have the exact same note-on
-          time), the program uses one of the notes. Any notes outside the
-          range of the chosen instrument will be octave-shifted in.
+          time), the program uses one of the notes. Any notes outside the range
+          of the chosen instrument will be octave-shifted in.
           <br></br>
           <br></br>
           If fewer than three tabs are visible, it's because the algorithm
@@ -404,10 +420,10 @@ export default function App () {
           programming step.
           <br></br>
           <br></br>
-            To report bugs or suggest new features, email me at{' '}
-            <a href='mailto:michael.li.46335@gmail.com'>
-              michael.li.46335@gmail.com
-            </a>
+          To report bugs or suggest new features, email me at{' '}
+          <a href='mailto:michael.li.46335@gmail.com'>
+            michael.li.46335@gmail.com
+          </a>
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>
@@ -675,7 +691,7 @@ export default function App () {
             {custom && (
               <>
                 <p style={{ fontSize: 'medium', marginBottom: '0' }}>
-                  enter the six strings from low to high
+                  enter the strings from low to high
                 </p>
                 <div style={{ display: 'flex' }}>
                   <Form.Control
