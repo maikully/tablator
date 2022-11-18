@@ -9,12 +9,13 @@ When playing a passage, for every note, a guitarist must choose which finger to 
 
 The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Higher frets also produce higher cost.
 
-Currently, the program will only work on monophonic data. For any polyphonic parts (if two consecutive notes have the exact same note-on time), the program only uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
+Currently, the program will only work on monophonic data. For any polyphonic beats (if two consecutive notes have the exact same note-on time), the program uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
 
 ## Features
 
 - compose a line using a virtual keyboard and view its best tabs
 - import a midi file and view its best tabs
+- set a capo or adjust the cost settings
 - make tabs for bass or alternate tunings
 - play the midi file out loud
 - download the tab as a txt file

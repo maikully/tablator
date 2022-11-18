@@ -392,14 +392,14 @@ export default function App () {
           <br></br>
           <br></br>
           Currently, the program will only work on monophonic parts. For any
-          polyphonic parts (if two consecutive notes have the exact same note-on
-          time), the program only uses one of the notes. Any notes outside the
+          polyphonic beats (if two consecutive notes have the exact same note-on
+          time), the program uses one of the notes. Any notes outside the
           range of the chosen instrument will be octave-shifted in.
           <br></br>
           <br></br>
           If fewer than three tabs are visible, it's because the algorithm
           didn't find three tabs dissimilar enough. The algorithm won't choose a
-          very bad path in lieu of a dissimlar good path because of the
+          very bad path in lieu of a dissimilar good path because of the
           "filtering" done while calculating the best paths during the dynamic
           programming step.
           <br></br>
