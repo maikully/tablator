@@ -46,6 +46,7 @@ python3 base.py
 - [ ] display as score using Lilypond
 - [ ] option to download composed midi
 - [ ] option to octave shift
+- [x] capo
 - [x] fix negative difficulty values when prioritizing higher
 - [x] add custom tunings
 - [x] option to ignore fret height

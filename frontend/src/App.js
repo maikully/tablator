@@ -1,12 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import { useState } from 'react'
-import {
-  Button,
-  ToggleButton,
-  Form,
-  Modal,
-} from 'react-bootstrap'
+import { Button, ToggleButton, Form, Modal } from 'react-bootstrap'
 import Alert from 'react-bootstrap/Alert'
 import MidiPlayer from 'react-midi-player'
 import $ from 'jquery'
@@ -407,6 +402,12 @@ export default function App () {
           very bad path in lieu of a dissimlar good path because of the
           "filtering" done while calculating the best paths during the dynamic
           programming step.
+          <br></br>
+          <br></br>
+            To report bugs, email me at{' '}
+            <a href='mailto:michael.li.46335@gmail.com'>
+              michael.li.46335@gmail.com
+            </a>
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>
@@ -495,7 +496,7 @@ export default function App () {
                     fontSize: 'large',
                     fontFamily: 'monospace',
                     textAlign: 'left',
-                    marginBottom:'0px'
+                    marginBottom: '0px'
                   }}
                 >
                   instrument setting: {mapInstrument.get(radioValue)}
@@ -562,7 +563,7 @@ export default function App () {
                         fontSize: 'large',
                         fontFamily: 'monospace',
                         textAlign: 'left',
-                        marginBottom:'0px'
+                        marginBottom: '0px'
                       }}
                     >
                       input setting: {mapAccidental.get(accidentals)}
@@ -573,21 +574,21 @@ export default function App () {
                       fontSize: 'large',
                       fontFamily: 'monospace',
                       textAlign: 'left',
-                      marginBottom:'0px'
+                      marginBottom: '0px'
                     }}
                   >
                     instrument setting: {mapInstrument.get(radioValue)}
                   </p>
-                <p
-                  style={{
-                    fontSize: 'large',
-                    fontFamily: 'monospace',
-                    textAlign: 'left',
-                    marginBottom:'2vh'
-                  }}
-                >
-                  capo position: {capo}
-                </p>
+                  <p
+                    style={{
+                      fontSize: 'large',
+                      fontFamily: 'monospace',
+                      textAlign: 'left',
+                      marginBottom: '2vh'
+                    }}
+                  >
+                    capo position: {capo}
+                  </p>
                 </Form.Group>
               </FadeIn>
             </Form>
@@ -847,7 +848,7 @@ export default function App () {
               style={{ width: '3.5em' }}
               placeholder={0}
               value={capo}
-              onChange={(e) => setCapo(e.target.value)}
+              onChange={e => setCapo(e.target.value)}
             />
           </Modal.Body>
           <Modal.Footer>
