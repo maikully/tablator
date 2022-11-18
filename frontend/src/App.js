@@ -691,7 +691,7 @@ export default function App () {
             {custom && (
               <>
                 <p style={{ fontSize: 'medium', marginBottom: '0' }}>
-                  enter the strings from low to high
+                  enter the strings from bottom of the tab to top of the tab
                 </p>
                 <div style={{ display: 'flex' }}>
                   <Form.Control
@@ -802,7 +802,7 @@ export default function App () {
                 checked={higher === 0}
                 onChange={() => setHigher(0)}
               >
-                default
+                penalize higher frets
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -814,7 +814,7 @@ export default function App () {
                 checked={higher === 1}
                 onChange={() => setHigher(1)}
               >
-                ignore cost of higher frets
+                don't penalize higher frets
               </ToggleButton>
               <ToggleButton
                 type='radio'
