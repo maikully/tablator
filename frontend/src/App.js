@@ -532,13 +532,9 @@ export default function App () {
         )}
         {menu === 2 && (
           <>
-            <Form style={{ width: '30vw' }}>
+            <Form style={{width:"600px", maxWidth:"100vw"}}>
               <FadeIn>
-                <Form.Group
-                  onChange={uploadFile}
-                  controlId='formFile'
-                  className='mb-3'
-                >
+                <Form.Group>
                   <Form.Label>
                     <p style={{ fontSize: 'medium' }}>
                       type in a series of notes to generate its best possible
@@ -627,8 +623,8 @@ export default function App () {
                   stopNote={midiNumber => {
                     //console.log(note(midiNumber))
                   }}
-                  width={600}
-                  style={{ align: 'center' }}
+                  width={Math.min(600, window.screen.width)}
+                  style={{ align: 'center', maxWidth:"100vw" }}
                 />
                 <br></br>
               </FadeIn>
@@ -645,7 +641,7 @@ export default function App () {
             )}
           </>
         )}
-        <Modal show={settingsShow} backdrop='static' size="lg">
+        <Modal show={settingsShow} backdrop='static' size='lg'>
           <Modal.Header>
             <Modal.Title>Settings</Modal.Title>
           </Modal.Header>
