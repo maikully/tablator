@@ -2,7 +2,7 @@ import time
 import os
 from io import BytesIO
 from mido import MidiFile
-from tab_creator import extract_notes, generate_fingerings, compute_cost, get_paths, tab_to_string, generate_tab_arr, normalize_costs, measure_similarity
+from tab_creator import extract_notes, generate_fingerings, get_paths, normalize_costs, create_output_strs
 from flask import Flask, current_app, jsonify, request, flash, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from flask_cors import CORS, cross_origin
@@ -53,13 +53,10 @@ def process_file():
         total_range = TOTAL_BASS_RANGE
     elif instrument == "custom":
         starts = [int(x) for x in request.form["customStrings"].split(',')]
-        print(starts)
         ranges = RANGES_GUITAR
         total_range = starts[-1] - starts[0] + ranges[-1]
         strings = request.form["stringsNames"].split(',')
         strings.reverse()
-        print(strings)
-    num_strings = len(strings)
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -80,65 +77,15 @@ def process_file():
     sequence = generate_fingerings(notes, starts, ranges)
     final_paths = get_paths(sequence, settings)
     sorted_paths = sorted(final_paths.values(), key=lambda x: x[0])
-    # take top three paths
-    counter = 0
-    seen = set()
-    strs = []
-    costs = []
-    paths_chosen = []
-    measure_similarity(sorted_paths[0][1], sorted_paths[1][1])
-    for i, (cost, path) in enumerate(sorted_paths):
-        if counter < 3:
-            to_check = tuple([x[0] for x in path])
-            if to_check in seen:
-                continue
-            else:
-                max_similarity = 0
-                for x in seen:
-                    if measure_similarity(to_check, x) > max_similarity:
-                        max_similarity = measure_similarity(to_check, x)
-                if max_similarity > .95:
-                    continue
-                seen.add(to_check)
-                costs.append(cost)
-                # get tab arr from path
-                tab_arr = generate_tab_arr(file, path, num_strings)
-                strs.append([])
-                length = len(tab_arr[0])
-                line_length = screen_width // 12
-                lines = length // line_length + 1
-                remainder = length % line_length - 1
-                if length < line_length:
-                    for i,y in enumerate(tab_arr):
-                        strs[-1].append(strings[i] + "|" + "".join(y) + "|")
-                else:
-                    # flag represents which string should have its first digit removed
-                    flag = None
-                    for n in range(lines - 1):
-                        for i,string in enumerate(tab_arr):
-                            # if a two-digit fret is being cut off
-                            if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
-                                if flag == i:
-                                    strs[-1].append(strings[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1])
-                                else:
-                                    strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length + 1])
-                                flag = i
-                            else:
-                                if flag == i:
-                                    strs[-1].append(strings[i] + "|-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] + "|")
-                                    flag = None
-                                else:
-                                    strs[-1].append(strings[i] + "|" + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
-                        strs[-1].append("\n")
-                    if remainder > 0:
-                        for i,z in enumerate(tab_arr):
-                            strs[-1].append(strings[i] + "|" + "".join(z)[(n + 1) * line_length:(n + 1) * line_length + remainder + 2]  +"|")
-                
-            counter += 1
+    (strs, costs) = create_output_strs(file, sorted_paths, strings, screen_width)
+    # remove file
     os.remove(UPLOAD_FOLDER + "/" + "temp.mid")
+    # normalize costs to a percentage
     costs = normalize_costs(costs, len(notes))
     ret = {"data": strs, "costs": costs}
     return ret
+
+
 
 @app.route('/')
 def index():

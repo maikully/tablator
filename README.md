@@ -13,9 +13,9 @@ Currently, the program will only work on monophonic data. For any polyphonic par
 
 ## Features
 
-- create tabs for guitar and bass, or input a custom tuning
-- compose a line using a virtual keyboard and view up to three of its best tabs
-- import a midi file and view up to three of its best tabs
+- compose a line using a virtual keyboard and view its best tabs
+- import a midi file and view its best tabs
+- make tabs for bass or alternate tunings
 - play the midi file out loud
 - download the tab as a txt file
 

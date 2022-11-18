@@ -52,25 +52,23 @@ export default function App () {
   const handleShow = () => setShow(true)
   const handleSettingsShow = x => {
     if (custom && !x) {
+      var strings = [stringOne, stringTwo, stringThree, stringFour, stringFive, stringSix]
       try {
-        MidiNumbers.fromNote(stringOne)
-        MidiNumbers.fromNote(stringTwo)
-        MidiNumbers.fromNote(stringThree)
-        MidiNumbers.fromNote(stringFour)
-        MidiNumbers.fromNote(stringFive)
-        MidiNumbers.fromNote(stringSix)
+        strings.map(x => MidiNumbers.fromNote(x))
       } catch (e) {
         setError('One or more strings are invalid')
         showStringError(true)
         return
       }
+      /*
       if (MidiNumbers.fromNote(stringOne) >= MidiNumbers.fromNote(stringSix)) {
-        setError('String one must be lower than string one')
+        setError('String one must be lower than string six')
         showStringError(true)
         return
       }
-      setFirstNote(MidiNumbers.fromNote(stringOne))
-      setLastNote(MidiNumbers.fromNote(stringSix) + 24)
+      */
+      setFirstNote(Math.min(...strings.map(x => MidiNumbers.fromNote(x))))
+      setLastNote(Math.max(...strings.map(x => MidiNumbers.fromNote(x))) + 24)
     }
     setSettingsShow(x)
   }
@@ -633,64 +631,64 @@ export default function App () {
             </ButtonGroup>{' '}
             {custom && (
               <>
-                <p style={{ fontSize: 'medium' }}>
+                <p style={{ fontSize: 'medium', marginBottom:"0" }}>
                   enter the six strings from low to high
                 </p>
                 <div style={{ display: 'flex' }}>
                   <Form.Control
                     type='text'
                     placeholder='1'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => {
                       setStringOne(e.target.value)
                     }}
                     value={stringOne}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
 
                   <Form.Control
                     type='text'
                     placeholder='2'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => setStringTwo(e.target.value)}
                     value={stringTwo}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
 
                   <Form.Control
                     type='text'
                     placeholder='3'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => setStringThree(e.target.value)}
                     value={stringThree}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
 
                   <Form.Control
                     type='text'
                     placeholder='4'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => setStringFour(e.target.value)}
                     value={stringFour}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
 
                   <Form.Control
                     type='text'
                     placeholder='5'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => setStringFive(e.target.value)}
                     value={stringFive}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
 
                   <Form.Control
                     type='text'
                     placeholder='6'
-                    maxLength='2'
+                    maxLength='3'
                     onChange={e => setStringSix(e.target.value)}
                     value={stringSix}
-                    style={{ width: '3em' }}
+                    style={{ width: '3.5em' }}
                   />
                 </div>
                 <br></br>
@@ -827,7 +825,7 @@ export default function App () {
             class='alert alert-block alert-danger'
             style={{ marginBottom: '0' }}
           >
-            <h4>Error!</h4>
+            <h4>Try again!</h4>
             {error}
           </div>
         </Modal>

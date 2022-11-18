@@ -54,6 +54,8 @@ convert list of costs to difficulty values
 """
 def normalize_costs(costs, length):
     normalized = []
+    if min(costs) < 0:
+        costs = [x - min(costs) for x in costs]
     for cost in costs:
         max_cost_for_length = length * 9
         normalized.append(cost/max_cost_for_length * 100)
@@ -248,11 +250,84 @@ def generate_fingerings(notes, starts, ranges):
         sequence += [[(string, fret, finger)
                       for string, fret in note_fingering for finger in FINGERS]]
     return sequence
-
+"""
+get arr of strs representing output paths and arr of their costs
+"""
+def create_output_strs(file, sorted_paths, strings, screen_width):
+    counter = 0
+    seen = set()
+    strs = []
+    costs = []
+    for i, (cost, path) in enumerate(sorted_paths):
+        if counter < 3:
+            to_check = tuple([x[0] for x in path])
+            if to_check in seen:
+                continue
+            else:
+                max_similarity = 0
+                for x in seen:
+                    if measure_similarity(to_check, x) > max_similarity:
+                        max_similarity = measure_similarity(to_check, x)
+                if max_similarity > .95:
+                    continue
+                seen.add(to_check)
+                costs.append(cost)
+                # get tab arr from path
+                tab_arr = generate_tab_arr(file, path, len(strings))
+                strs.append([])
+                length = len(tab_arr[0])
+                line_length = screen_width // 12
+                lines = length // line_length + 1
+                remainder = length % line_length - 1
+                if length < line_length:
+                    for i,y in enumerate(tab_arr):
+                        # if string name has accidental
+                        if len(strings[i]) > 2:
+                            flag = ""
+                        else:
+                            flag = "|"
+                        strs[-1].append(strings[i] + flag + "".join(y) + "|")
+                else:
+                    # flag represents which string should have its first digit removed
+                    flag = None
+                    # flag represents when a string name has an accidental and the first char after should be omitted
+                    flag2 = "|"
+                    for n in range(lines - 1):
+                        for i,string in enumerate(tab_arr):
+                            # if string tuning has an accidental
+                            if len(strings[i]) > 2:
+                                flag2 = ""
+                            else:
+                                flag2 = "|"
+                            # if a two-digit fret is being cut off
+                            if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
+                                if flag == i:
+                                    strs[-1].append(strings[i] + flag2 + "-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1])
+                                else:
+                                    strs[-1].append(strings[i] + flag2 + "".join(string)[n * line_length: (n + 1) * line_length + 1])
+                                flag = i
+                            else:
+                                if flag == i:
+                                    strs[-1].append(strings[i] + flag2 + "-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] + "|")
+                                    flag = None
+                                else:
+                                    strs[-1].append(strings[i] + flag2 + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
+                        strs[-1].append("\n")
+                    if remainder > 0:
+                        for i,z in enumerate(tab_arr):
+                            if len(strings[i]) > 2:
+                                flag2 = ""
+                            else:
+                                flag2 = "|"
+                            strs[-1].append(strings[i] + flag2 + "".join(z)[(n + 1) * line_length:(n + 1) * line_length + remainder + 2]  +"|")
+                
+            counter += 1
+    return (strs, costs)
 
 def main():
     file_path = sys.argv[1]
     file = MidiFile(file_path, clip=True)
+    """
     output = [[], [], [], [], [], []]
     #output, num_notes, notes = get_all_tab_monophonic(file)
     notes = extract_notes(file)
@@ -272,7 +347,7 @@ def main():
                 tab_arr = generate_tab_arr(file, path)
                 write_tab(tab_arr, str(i) + " cost " + str(cost))
             counter += 1
-
+    """
 
 
 if __name__ == "__main__":
