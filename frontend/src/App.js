@@ -645,7 +645,7 @@ export default function App () {
             )}
           </>
         )}
-        <Modal show={settingsShow} backdrop='static'>
+        <Modal show={settingsShow} backdrop='static' size="lg">
           <Modal.Header>
             <Modal.Title>Settings</Modal.Title>
           </Modal.Header>
@@ -750,9 +750,9 @@ export default function App () {
                     style={{ width: '3.5em' }}
                   />
                 </div>
-                <br></br>
               </>
             )}
+            <br></br>
             <ButtonGroup className='mb-2'>
               <ToggleButton
                 type='radio'
@@ -764,7 +764,7 @@ export default function App () {
                 checked={open === 0}
                 onChange={() => setOpen(0)}
               >
-                default
+                don't avoid open strings (default)
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -773,8 +773,8 @@ export default function App () {
                 key={'buttonavoid'}
                 id={'buttonavoid'}
                 value={'buttonavoid'}
-                checked={open === 2}
-                onChange={() => setOpen(2)}
+                checked={open === 1}
+                onChange={() => setOpen(1)}
               >
                 avoid open strings
               </ToggleButton>
@@ -785,8 +785,8 @@ export default function App () {
                 key={'buttonprioritize'}
                 id={'buttonprioritize'}
                 value={'buttonprioritize'}
-                checked={open === 1}
-                onChange={() => setOpen(1)}
+                checked={open === 2}
+                onChange={() => setOpen(2)}
               >
                 prioritize open strings
               </ToggleButton>
@@ -802,7 +802,7 @@ export default function App () {
                 checked={higher === 0}
                 onChange={() => setHigher(0)}
               >
-                avoid high frets
+                avoid high frets (default)
               </ToggleButton>
               <ToggleButton
                 type='radio'
@@ -829,6 +829,7 @@ export default function App () {
                 prioritize high frets
               </ToggleButton>
             </ButtonGroup>
+            <br></br>
             {menu === 2 && (
               <ButtonGroup className='mb-2'>
                 <ToggleButton

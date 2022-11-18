@@ -25,15 +25,15 @@ def compute_cost(position1, position2, settings):
     string1, fret1, finger1 = position1
     string2, fret2, finger2 = position2
     opensetting,highersetting = settings
-    # prioritize open strings
+    # avoid open strings
     if opensetting == 1:
+        if int(fret1) == 0 or int(fret2) == 0:
+            return 8
+    # prioritize open strings
+    if opensetting == 2:
         if int(fret1) == 0 or int(fret2) == 0:
             return 0
     openfactor = 1
-    # avoid open strings
-    if opensetting == 2:
-        if int(fret1) == 0 or int(fret2) == 0:
-            return 8
     # ignore cost of higher frets
     if highersetting == 1:
         cost1 = 0
