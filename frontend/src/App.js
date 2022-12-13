@@ -420,10 +420,11 @@ export default function App () {
           programming step.
           <br></br>
           <br></br>
+          {/*
           To report bugs or suggest new features, email me at{' '}
           <a href='mailto:michael.li.46335@gmail.com'>
             michael.li.46335@gmail.com
-          </a>
+          </a>*/}
         </Modal.Body>
         <Modal.Footer>
           <Button variant='secondary' onClick={handleClose}>
