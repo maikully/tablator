@@ -43,10 +43,10 @@ python3 base.py
 - [ ] time representation between notes can be improved
 - [ ] get chords working
 - [ ] display note fingerings alongside note
-- [ ] add option to not prioritize open strings or lower frets  
 - [ ] display as score using Lilypond
-- [ ] option to download composed midi
 - [ ] option to octave shift
+- [x] add option to not prioritize open strings or lower frets  
+- [x] option to download composed midi
 - [x] capo
 - [x] fix negative difficulty values when prioritizing higher
 - [x] add custom tunings
