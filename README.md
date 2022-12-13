@@ -9,6 +9,9 @@ When playing a passage, for every note, a guitarist must choose which finger to 
 
 The cost function for the transition between two notes is calculated using the difference between the displacement in frets and the displacement in finger used (assuming all four fingers can comfortably cover exactly one fret). Higher frets also produce higher cost.
 
+
+    ![graph](graph.png)
+
 Currently, the program will only work on monophonic data. For any polyphonic beats (if two consecutive notes have the exact same note-on time), the program uses one of the notes. Any notes outside the range of the chosen instrument will be octave-shifted in.
 
 ## Features
