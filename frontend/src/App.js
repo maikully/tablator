@@ -21,7 +21,7 @@ ReactGA.send('pageview')
 
 export default function App () {
   //const url = 'http://127.0.0.1/tablator'
-  const url = 'https://tablator.herokuapp.com/tablator'
+  const url = 'https://tablator-f308fad98e20.herokuapp.com/tablator'
   const [firstNote, setFirstNote] = useState(40)
   const [lastNote, setLastNote] = useState(88)
   const MidiWriter = require('midi-writer-js')
