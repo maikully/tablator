@@ -9,8 +9,8 @@ import TabDisplay from './TabDisplay'
 import Spinner from 'react-bootstrap/Spinner'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import { BsDownload } from 'react-icons/bs'
-import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano'
-import { Interval, Note, Scale, Midi } from '@tonaljs/tonal'
+import { Piano, MidiNumbers } from 'react-piano'
+import { Note, Midi } from '@tonaljs/tonal'
 import 'react-piano/dist/styles.css'
 import { dataURItoBlob, truncateDecimals } from './funs'
 import FadeIn from 'react-fade-in'
@@ -25,78 +25,30 @@ export default function App () {
   const [firstNote, setFirstNote] = useState(40)
   const [lastNote, setLastNote] = useState(88)
   const MidiWriter = require('midi-writer-js')
-  const keyboardShortcuts = KeyboardShortcuts.create({
-    firstNote: firstNote,
-    lastNote: lastNote,
-    keyboardConfig: KeyboardShortcuts.HOME_ROW
-  })
-  const handleChange = i => {
-    switch (i) {
-      case 1:
-        setView1(true)
-        setView2(false)
-        setView3(false)
-        break
-      case 2:
-        setView1(false)
-        setView2(true)
-        setView3(false)
-        break
-      case 3:
-        setView1(false)
-        setView2(false)
-        setView3(true)
-        break
-      default:
-        break
-    }
+  const handleChange = tab => {
+    setView1(tab === 1)
+    setView2(tab === 2)
+    setView3(tab === 3)
   }
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
-  const handleSettingsShow = x => {
-    var flag = false
-    if (custom && !x) {
-      var strings = [
-        stringOne,
-        stringTwo,
-        stringThree,
-        stringFour,
-        stringFive,
-        stringSix
-      ]
+  const handleSettingsShow = show => {
+    if (custom && !show) {
       try {
-        strings.map(x => {
-          MidiNumbers.fromNote(x)
-        })
-      } catch (e) {
+        const notes = customStrings.map(string => MidiNumbers.fromNote(string))
+        if (notes.some(note => !Number.isInteger(note) || note < 0 || note > 127) ||
+            customStrings.some(string => !isNaN(string.charAt(0)))) {
+          throw new Error('invalid string')
+        }
+        setFirstNote(Math.min(...notes))
+        setLastNote(Math.max(...notes) + 24)
+      } catch (error) {
         setError('One or more strings are invalid')
         showStringError(true)
         return
       }
-      strings.map(x => {
-        MidiNumbers.fromNote(x)
-        if (MidiNumbers.fromNote(x) > 127 || !isNaN(x.charAt(0))) {
-          console.log(MidiNumbers.fromNote(x))
-          setError('One or more strings are invalid')
-          showStringError(true)
-          flag = true
-        }
-      })
-      /*
-      if (MidiNumbers.fromNote(stringOne) >= MidiNumbers.fromNote(stringSix)) {
-        setError('String one must be lower than string six')
-        showStringError(true)
-        return
-      }
-      */
-      if (flag) {
-        return
-      }
-      console.log('asdsads')
-      setFirstNote(Math.min(...strings.map(x => MidiNumbers.fromNote(x))))
-      setLastNote(Math.max(...strings.map(x => MidiNumbers.fromNote(x))) + 24)
     }
-    setSettingsShow(x)
+    setSettingsShow(show)
   }
   const setRadio = x => {
     switch (x) {
@@ -112,9 +64,7 @@ export default function App () {
         break
     }
     setRadioValue(x)
-    if (x === 2) {
-      setCustom(true)
-    } else setCustom(false)
+    setCustom(x === 2)
   }
   const goBack = () => {
     setMenu(0)
@@ -126,6 +76,8 @@ export default function App () {
     setView2(false)
     setView3(false)
     setFile(null)
+    setMidiTarget(null)
+    setDataURI('')
     setOpen(0)
     setRadio(0)
     setAlert(false)
@@ -166,7 +118,6 @@ export default function App () {
   const [view1, setView1] = useState(false)
   const [view2, setView2] = useState(false)
   const [view3, setView3] = useState(false)
-  const [filename, setFilename] = useState('')
   const [midiTarget, setMidiTarget] = useState(null)
   const [midiFile, setFile] = useState(null)
   const [load, setLoading] = useState(false)
@@ -174,210 +125,95 @@ export default function App () {
   const [input, setInput] = useState('')
   const [higher, setHigher] = useState(0)
   const [capo, setCapo] = useState(0)
-  // the react post request sender
+  const customStrings = [stringOne, stringTwo, stringThree, stringFour, stringFive, stringSix]
   const fileToArrayBuffer = require('file-to-array-buffer')
-  const setMidi = e => {
-    const file = e.target.files[0]
-    const extension = e.target.files[0].name
-      .split('.')
-      .pop()
-      .toLowerCase()
-      .trim()
+  const setMidi = async event => {
+    const file = event.target.files[0]
+    setMidiTarget(null)
+    setFile(null)
+    if (!file) return
+    const extension = file.name.split('.').pop().toLowerCase().trim()
     if (extension !== 'mid' && extension !== 'midi') {
       setAlertmessage('file type not mid or midi!')
-      setAlert(true)
-    } else {
-      setAlert(false)
-      setMidiTarget(file)
-      fileToArrayBuffer(file).then(data => {
-        setFile(data)
-      })
-      console.log(midiFile)
-    }
-  }
-  const uploadFile = async e => {
-    const file = midiTarget
-    const extension = file.name
-      .split('.')
-      .pop()
-      .toLowerCase()
-      .trim()
-    if (extension !== 'mid' && extension !== 'midi') {
-      setAlertmessage('file type not mid or midi!')
-      setAlert(true)
-    } else {
-      setAlert(false)
-      fileToArrayBuffer(file).then(data => {
-        setFile(data)
-        //=> ArrayBuffer {byteLength: ...}
-      })
-      if (file !== null) {
-        var instrument = ''
-        switch (radioValue) {
-          case 0:
-            instrument = 'guitar'
-            break
-          case 1:
-            instrument = 'bass'
-            break
-          case 2:
-            instrument = 'custom'
-            break
-          default:
-            instrument = ''
-            break
-        }
-        const data = new FormData()
-        const width = $(window).width()
-        data.append('file', file)
-        data.append('width', width)
-        data.append('instrument', instrument)
-        data.append('opensetting', open)
-        data.append('higher', higher)
-        data.append('capo', capo)
-        if (custom) {
-          data.append('customStrings', [
-            MidiNumbers.fromNote(stringOne),
-            MidiNumbers.fromNote(stringTwo),
-            MidiNumbers.fromNote(stringThree),
-            MidiNumbers.fromNote(stringFour),
-            MidiNumbers.fromNote(stringFive),
-            MidiNumbers.fromNote(stringSix)
-          ])
-          data.append('stringsNames', [
-            Note.pitchClass(stringOne),
-            Note.pitchClass(stringTwo),
-            Note.pitchClass(stringThree),
-            Note.pitchClass(stringFour),
-            Note.pitchClass(stringFive),
-            Note.pitchClass(stringSix)
-          ])
-        }
-        setLoading(true)
-        let response = await fetch(url, {
-          method: 'post',
-          body: data
-        })
-        let res = await response.json()
-        setLoading(false)
-        if (res.data[0]) {
-          setTab1(res.data[0])
-          setCost1(truncateDecimals(res.costs[0], 2))
-        } else {
-          setTab1([])
-        }
-        if (res.data[1]) {
-          setTab2(res.data[1])
-          setCost2(truncateDecimals(res.costs[1], 2))
-        } else {
-          setTab2([])
-        }
-        if (res.data[2]) {
-          setTab3(res.data[2])
-          setCost3(truncateDecimals(res.costs[2], 2))
-        } else {
-          setTab3([])
-        }
-      }
-    }
-  }
-  const uploadNotesData = async e => {
-    var data = input.trim().split(/\s+/)
-    if (data.length === 1) {
-      setAlertmessage('input must contain at least 2 notes!')
       setAlert(true)
       return
-    } else {
-      setAlert(false)
     }
-    const track = new MidiWriter.Track()
-    track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: 1 }))
-
-    // Add notes
-    data.map(note => {
-      const n = new MidiWriter.NoteEvent({
-        pitch: note,
-        duration: '8'
-      })
-      track.addEvent(n)
-    })
-
-    // Generate a data URI
-    const write = new MidiWriter.Writer(track)
-    setFile(write.dataUri().replace(/^data:audio\/midi;base64,/, ''))
-    fileToArrayBuffer(dataURItoBlob(write.dataUri())).then(data => {
+    try {
+      const data = await fileToArrayBuffer(file)
+      setMidiTarget(file)
       setFile(data)
-      //=> ArrayBuffer {byteLength: ...}
-    })
-    setDataURI(write.dataUri())
-    var file = dataURItoBlob(write.dataUri())
-    if (file !== null) {
-      var instrument = ''
-      switch (radioValue) {
-        case 0:
-          instrument = 'guitar'
-          break
-        case 1:
-          instrument = 'bass'
-          break
-        case 2:
-          instrument = 'custom'
-          break
-        default:
-          instrument = ''
-          break
-      }
+      setAlert(false)
+    } catch (error) {
+      setAlertmessage('could not read midi file')
+      setAlert(true)
+    }
+  }
+  const generateTabs = async file => {
+    setLoading(true)
+    setAlert(false)
+    try {
       const data = new FormData()
-      const width = $(window).width()
       data.append('file', file)
-      data.append('width', width)
-      data.append('instrument', instrument)
+      data.append('width', $(window).width())
+      data.append('instrument', mapInstrument.get(radioValue))
       data.append('opensetting', open)
       data.append('higher', higher)
       data.append('capo', capo)
       if (custom) {
-        data.append('customStrings', [
-          MidiNumbers.fromNote(stringOne),
-          MidiNumbers.fromNote(stringTwo),
-          MidiNumbers.fromNote(stringThree),
-          MidiNumbers.fromNote(stringFour),
-          MidiNumbers.fromNote(stringFive),
-          MidiNumbers.fromNote(stringSix)
-        ])
-        data.append('stringsNames', [
-          stringOne,
-          stringTwo,
-          stringThree,
-          stringFour,
-          stringFive,
-          stringSix
-        ])
+        data.append('customStrings', customStrings.map(string => MidiNumbers.fromNote(string)))
+        data.append('stringsNames', customStrings.map(string => Note.pitchClass(string)))
       }
-      setLoading(true)
-      let response = await fetch(url, {
-        method: 'post',
-        body: data
+      const response = await fetch(url, { method: 'post', body: data })
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'could not generate tabs')
+      }
+      const tabSetters = [setTab1, setTab2, setTab3]
+      const costSetters = [setCost1, setCost2, setCost3]
+      tabSetters.forEach((setTab, index) => {
+        setTab(result.data[index] || [])
+        costSetters[index](truncateDecimals(result.costs[index] || 0, 2))
       })
-      let res = await response.json()
+      setView1(false)
+      setView2(false)
+      setView3(false)
+    } catch (error) {
+      setAlertmessage(error.message || 'could not generate tabs')
+      setAlert(true)
+    } finally {
       setLoading(false)
-      if (res.data[0]) {
-        setTab1(res.data[0])
-        setCost1(truncateDecimals(res.costs[0], 2))
-      } else {
-        setTab1([])
-      }
-      if (res.data[1]) {
-        setTab2(res.data[1])
-        setCost2(truncateDecimals(res.costs[1], 2))
-      } else {
-        setTab2([])
-      }
-      if (res.data[2]) {
-        setTab3(res.data[2])
-        setCost3(truncateDecimals(res.costs[2], 2))
-      } else {
-        setTab3([])
-      }
+    }
+  }
+  const uploadFile = async () => {
+    if (!midiTarget) {
+      setAlertmessage('select a midi file first')
+      setAlert(true)
+      return
+    }
+    await generateTabs(midiTarget)
+  }
+  const uploadNotesData = async () => {
+    const notes = input.trim().split(/\s+/)
+    if (notes.length < 2) {
+      setAlertmessage('input must contain at least 2 notes!')
+      setAlert(true)
+      return
+    }
+    try {
+      const track = new MidiWriter.Track()
+      track.addEvent(new MidiWriter.ProgramChangeEvent({ instrument: 1 }))
+      notes.forEach(note => {
+        track.addEvent(new MidiWriter.NoteEvent({ pitch: note, duration: '8' }))
+      })
+      const writer = new MidiWriter.Writer(track)
+      const dataURI = writer.dataUri()
+      const file = dataURItoBlob(dataURI)
+      setFile(await fileToArrayBuffer(file))
+      setDataURI(dataURI)
+      await generateTabs(file)
+    } catch (error) {
+      setAlertmessage('one or more notes are invalid')
+      setAlert(true)
     }
   }
   return (
@@ -609,20 +445,12 @@ export default function App () {
                 <Piano
                   noteRange={{ first: firstNote, last: lastNote }}
                   playNote={midiNumber => {
-                    var note = require('midi-note')
-                    if (accidentals === 0) {
-                      var sharps = true
-                    } else {
-                      var sharps = false
-                    }
-                    var noteName = Midi.midiToNoteName(midiNumber, {
-                      sharps: sharps
+                    const noteName = Midi.midiToNoteName(midiNumber, {
+                      sharps: accidentals === 0
                     })
-                    setInput(input + ' ' + noteName)
+                    setInput(input => input + ' ' + noteName)
                   }}
-                  stopNote={midiNumber => {
-                    //console.log(note(midiNumber))
-                  }}
+                  stopNote={() => {}}
                   width={Math.min(600, window.screen.width)}
                   style={{ align: 'center', maxWidth:"100vw" }}
                 />
@@ -887,7 +715,7 @@ export default function App () {
 
         <Modal size='lg' show={showError} onHide={() => showStringError(false)}>
           <div
-            class='alert alert-block alert-danger'
+            className='alert alert-block alert-danger'
             style={{ marginBottom: '0' }}
           >
             <h4>Try again!</h4>
@@ -963,13 +791,13 @@ export default function App () {
         </div>
       )}
       {view1 && menu !== 0 && (
-        <TabDisplay cost={cost1} tab={tab1} filename={filename} num={1} />
+        <TabDisplay cost={cost1} tab={tab1} num={1} />
       )}
       {view2 && menu !== 0 && (
-        <TabDisplay cost={cost2} tab={tab2} filename={filename} num={2} />
+        <TabDisplay cost={cost2} tab={tab2} num={2} />
       )}
       {view3 && menu !== 0 && (
-        <TabDisplay cost={cost3} tab={tab3} filename={filename} num={3} />
+        <TabDisplay cost={cost3} tab={tab3} num={3} />
       )}
     </div>
   )

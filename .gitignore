@@ -19,6 +19,14 @@ htmlcov/
 node_modules/
 coverage/
 *.tsbuildinfo
+.eslintcache
+.cache/
+.parcel-cache/
+.npm/
+.tmp/
+tmp/
+*.tmp
+*.bak
 
 .env
 .env.*

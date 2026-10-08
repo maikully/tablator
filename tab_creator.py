@@ -53,13 +53,13 @@ def compute_cost(position1, position2, settings):
 convert list of costs to difficulty values
 """
 def normalize_costs(costs, length):
-    normalized = []
-    if min(costs) < 0:
-        costs = [x - min(costs) for x in costs]
-    for cost in costs:
-        max_cost_for_length = length * 9
-        normalized.append(cost/max_cost_for_length * 100)
-    return normalized
+    if not costs:
+        return []
+    if length <= 0:
+        return [0 for cost in costs]
+    offset = min(0, min(costs))
+    max_cost = length * 9
+    return [(cost - offset) / max_cost * 100 for cost in costs]
 
 """
 get all possible tabnotes for a given pitch
@@ -146,8 +146,8 @@ def get_all_tab_monophonic(file):
 shift a note into fuitar range
 """
 def correct_note(note, starts, total_range):
-    lower_bound = starts[0]
-    upper_bound = starts[0] + total_range
+    lower_bound = min(starts)
+    upper_bound = lower_bound + total_range
     if note < lower_bound:
         #print("too low")
         #print((note - lower_bound) % 12 + lower_bound)
@@ -181,22 +181,23 @@ def extract_notes(file, starts, total_range):
 find the costs and paths in the sequence
 """
 def get_paths(sequence, settings):
-    final_paths = defaultdict(dict)
-    # set one-note paths to zero cost
-    final_paths[0] = dict(zip(sequence[0], [(0, [seq])
-                          for seq in sequence[0]]))
-    # for the rest of the notes, construct list of paths for every current possible position
-    for i, possible_positions in enumerate(sequence[1:]):
-        # checking every possible position
+    if not sequence:
+        return {}
+    paths = {position: (0, [position]) for position in sequence[0]}
+    for possible_positions in sequence[1:]:
+        next_paths = {}
         for position in possible_positions:
-            min = sys.maxsize
-            # checking every position for the previous note
-            for prev_position, (prev_cost, prev_sequence) in final_paths[i].items():
-                curr_cost = prev_cost + compute_cost(prev_position, position, settings)
-                if curr_cost < min:
-                    min, path = curr_cost, prev_sequence + [position]
-            final_paths[i+1][position] = (min, path)
-    return final_paths[i+1]
+            best_cost = float("inf")
+            best_path = None
+            for prev_position, (prev_cost, prev_path) in paths.items():
+                cost = prev_cost + compute_cost(prev_position, position, settings)
+                if cost < best_cost:
+                    best_cost = cost
+                    best_path = prev_path + [position]
+            if best_path is not None:
+                next_paths[position] = (best_cost, best_path)
+        paths = next_paths
+    return paths
 
 """
 generate a tab_arr from a file and a given path
@@ -253,76 +254,46 @@ def generate_fingerings(notes, starts, ranges):
 """
 get arr of strs representing output paths and arr of their costs
 """
+def format_tab(tab_arr, strings, screen_width):
+    rows = ["".join(row) for row in tab_arr]
+    if not rows:
+        return []
+    line_length = max(2, screen_width // 12)
+    length = len(rows[0])
+    output = []
+    start = 0
+    while start < length:
+        end = min(start + line_length, length)
+        # wrap before a two-digit fret so every string keeps the same columns
+        if end < length and any(row[end - 1].isdigit() and row[end].isdigit()
+                                for row in rows):
+            end -= 1
+        if output:
+            output.append("\n")
+        for name, row in zip(strings, rows):
+            separator = "" if len(name) > 2 else "|"
+            output.append(name + separator + row[start:end] + "|")
+        start = end
+    return output
+
+
 def create_output_strs(file, sorted_paths, strings, screen_width):
-    counter = 0
     seen = set()
-    strs = []
+    tabs = []
     costs = []
-    for i, (cost, path) in enumerate(sorted_paths):
-        if counter < 3:
-            to_check = tuple([x[0] for x in path])
-            if to_check in seen:
-                continue
-            else:
-                max_similarity = 0
-                for x in seen:
-                    if measure_similarity(to_check, x) > max_similarity:
-                        max_similarity = measure_similarity(to_check, x)
-                if max_similarity > .95:
-                    continue
-                seen.add(to_check)
-                costs.append(cost)
-                # get tab arr from path
-                tab_arr = generate_tab_arr(file, path, len(strings))
-                strs.append([])
-                length = len(tab_arr[0])
-                line_length = screen_width // 12
-                lines = length // line_length + 1
-                remainder = length % line_length - 1
-                if length < line_length:
-                    for i,y in enumerate(tab_arr):
-                        # if string name has accidental
-                        if len(strings[i]) > 2:
-                            flag = ""
-                        else:
-                            flag = "|"
-                        strs[-1].append(strings[i] + flag + "".join(y) + "|")
-                else:
-                    # flag represents which string should have its first digit removed
-                    flag = None
-                    # flag represents when a string name has an accidental and the first char after should be omitted
-                    flag2 = "|"
-                    for n in range(lines - 1):
-                        for i,string in enumerate(tab_arr):
-                            # if string tuning has an accidental
-                            if len(strings[i]) > 2:
-                                flag2 = ""
-                            else:
-                                flag2 = "|"
-                            # if a two-digit fret is being cut off
-                            if len("".join(string)) >= (n + 1) * line_length - 1 and "".join(string)[(n + 1) * line_length - 1] != "-" and "".join(string)[(n + 1) * line_length] != "-":
-                                if flag == i:
-                                    strs[-1].append(strings[i] + flag2 + "-" + "".join(string)[n * line_length + 1: (n + 1) * line_length + 1])
-                                else:
-                                    strs[-1].append(strings[i] + flag2 + "".join(string)[n * line_length: (n + 1) * line_length + 1])
-                                flag = i
-                            else:
-                                if flag == i:
-                                    strs[-1].append(strings[i] + flag2 + "-" + "".join(string)[n * line_length + 1: (n + 1) * line_length] + "|")
-                                    flag = None
-                                else:
-                                    strs[-1].append(strings[i] + flag2 + "".join(string)[n * line_length: (n + 1) * line_length] +"|")
-                        strs[-1].append("\n")
-                    if remainder > 0:
-                        for i,z in enumerate(tab_arr):
-                            if len(strings[i]) > 2:
-                                flag2 = ""
-                            else:
-                                flag2 = "|"
-                            strs[-1].append(strings[i] + flag2 + "".join(z)[(n + 1) * line_length:(n + 1) * line_length + remainder + 2]  +"|")
-                
-            counter += 1
-    return (strs, costs)
+    for cost, path in sorted_paths:
+        string_path = tuple(position[0] for position in path)
+        if string_path in seen or any(measure_similarity(string_path, previous) > .95
+                                      for previous in seen):
+            continue
+        seen.add(string_path)
+        tab_arr = generate_tab_arr(file, path, len(strings))
+        tabs.append(format_tab(tab_arr, strings, screen_width))
+        costs.append(cost)
+        if len(tabs) == 3:
+            break
+    return tabs, costs
+
 
 def main():
     file_path = sys.argv[1]

@@ -9,7 +9,8 @@
 /coverage
 
 # production
-#/build
+# Flask serves the build directly; keep runtime assets tracked.
+/build/**/*.map
 
 # misc
 .DS_Store
